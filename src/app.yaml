@@ -1,0 +1,1 @@
+command: ['chainlit', 'run', 'app.py']

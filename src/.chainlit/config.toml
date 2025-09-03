@@ -1,0 +1,89 @@
+[project]
+# Enable HTML rendering for rich content
+enable_html = true
+
+# List of environment variables to be provided by each user to use the app
+user_env = []
+
+# Duration (in seconds) during which the session is saved when the connection is lost
+session_timeout = 3600
+
+# Duration (in seconds) of the user session expiry (7 days for BI agent)
+user_session_timeout = 604800
+
+# Enable third parties caching (e.g., LangChain cache)
+cache = false
+
+# Whether to persist user environment variables (API keys) to the database
+persist_user_env = false
+
+# Whether to mask user environment variables (API keys) in the UI
+mask_user_env = false
+
+# Authorized origins
+allow_origins = ["*"]
+
+[features]
+# Process and display HTML in messages (disabled for security)
+unsafe_allow_html = false
+
+# Process and display mathematical expressions
+latex = false
+
+# Autoscroll new user messages at the top of the window
+user_message_autoscroll = true
+
+# Automatically tag threads with the current chat profile
+auto_tag_thread = true
+
+# Allow users to edit their own messages
+edit_message = true
+
+# Enable chat history persistence (required for sidebar)
+persist_chat_history = true
+
+# Enable thread management (required for sidebar)
+enable_thread_management = true
+
+# File upload for data analysis (restricted to common data formats)
+[features.spontaneous_file_upload]
+    enabled = true
+    # Accept common data file formats for BI analysis
+    accept = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/json",
+        "text/plain"
+    ]
+    max_files = 5
+    max_size_mb = 50
+
+[UI]
+# Name of the assistant
+name = "Spirit Airlines AI Agent"
+
+# Sidebar configuration
+default_sidebar_state = "open"
+show_sidebar = true
+
+# Chain of Thought display mode
+cot = "full"
+
+# Custom Spirit Airlines branding
+custom_css = "public/css/spirit-branding.css"
+# custom_js = "public/js/spirit-banner.js"
+
+# Spirit Airlines logo and branding
+logo_file_url = "public/images/spirit-logo.svg"
+login_page_image = "public/images/spirit-logo.svg"
+
+# Enable markdown and HTML rendering
+enable_markdown = true
+enable_html = true
+
+# Alert style
+alert_style = "classic"
+
+[meta]
+generated_by = "2.7.2"

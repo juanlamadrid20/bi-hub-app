@@ -1,0 +1,81 @@
+# This is a Databricks asset bundle definition for bi-hub-app.
+# The Databricks extension requires databricks.yml configuration file.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: bi-hub-app
+
+# Variables for environment-specific configuration
+variables:
+
+  lakebase_instance_name:
+    description: "Database instance name"
+    default: "bi-agent-chat-sessions"
+
+  model_endpoint_name:
+    description: "Databricks model serving endpoint name"
+    default: "mas-1a0aee60-endpoint"  
+  
+  # Catalog configuration
+  lakebase_database_name:
+    description: "Database name for database resources"
+    default: "chat_sessions"
+  
+  synced_catalog_name:
+    description: "Catalog name for database resources"
+    default: "bi_agent_chat_sessions"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-984752964297111.11.azuredatabricks.net
+    
+    resources:
+      jobs:
+        setup_lakebase:
+          name: "setup-lakebase-dev"
+          description: "Setup Lakebase PostgreSQL database and tables for development"
+          tasks:
+            - task_key: "setup_database"
+              spark_python_task:
+                python_file: "scripts/setup_lakebase.py"
+              environment_key: "default"
+          environments:
+            - environment_key: "default"
+              spec:
+                client: "1"
+          permissions:
+            - level: "CAN_MANAGE"
+              user_name: "rohit.bhagwat@databricks.com"
+
+      database_instances:
+        lakebase_postgres:
+          name: ${var.lakebase_instance_name}
+          capacity: "CU_1"
+      
+      apps:
+        bi-agent:
+          name: "bi-agent" 
+          description: "AI-powered Business Intelligence Agent"
+          resources:
+              - name: agent-endpoint
+                serving_endpoint:
+                  name: ${var.model_endpoint_name}
+                  permission: "CAN_QUERY"
+              # - name: lakebase-database
+              #   database:
+              #     instance_name: ${var.lakebase_instance_name}
+              #     database_name: ${var.lakebase_database_name}
+              #     permission: "CAN_CONNECT_AND_CREATE"                    
+          source_code_path: ./src
+          permissions:
+            - level: "CAN_USE"
+              user_name: "rohit.bhagwat@databricks.com"
+
+  ## Optionally, there could be 'staging' or 'prod' targets here.
+  #
+  # prod:
+  #   workspace:
+  #     host: https://adb-984752964297111.11.azuredatabricks.net

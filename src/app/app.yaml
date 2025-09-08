@@ -1,0 +1,9 @@
+command: ['chainlit', 'run', 'app.py']
+
+
+env: 
+  - name: CHAINLIT_AUTH_SECRET
+    value: "F8*9Z/LVfsoHzEt_/IvaI4s1-.1cd/bQ%Bmd5w5$FcXP$ga=taQR_,YE9Q91xnSG"
+  
+  - name: DATABASE_INSTANCE
+    value: "bi-agent-chat-session"

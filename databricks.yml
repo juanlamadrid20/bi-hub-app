@@ -10,7 +10,7 @@ variables:
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "bi-agent-chat-session-example"
+    default: "bi-agent-chat-session"
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
@@ -40,12 +40,12 @@ targets:
           tasks:
             - task_key: "setup_database"
               spark_python_task:
-                python_file: "scripts/setup_lakebase.py"
+                python_file: "./src/scripts/setup_chainlit_schema.py"
               environment_key: "default"
           environments:
             - environment_key: "default"
               spec:
-                client: "1"
+                environment_version: "1"
           permissions:
             - level: "CAN_MANAGE"
               user_name: "rohit.bhagwat@databricks.com"
@@ -57,7 +57,7 @@ targets:
       
       apps:
         bi-agent:
-          name: "bi-agent-new" 
+          name: "bi-agent" 
           description: "AI-powered Business Intelligence Agent"
           resources:
               - name: agent-endpoint
@@ -69,7 +69,7 @@ targets:
                   instance_name: ${var.lakebase_instance_name}
                   permission: CAN_CONNECT_AND_CREATE
                 name: database               
-          source_code_path: ./src
+          source_code_path: ./src/app
           permissions:
             - level: "CAN_USE"
               user_name: "rohit.bhagwat@databricks.com"

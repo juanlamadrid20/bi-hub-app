@@ -233,3 +233,87 @@ async def process_user_query(query: str):
                 "success": False,
                 "content": f"**Error**: {error_type} - {error_message}\n\nPlease check the logs for more details."
             }
+
+
+
+import re
+import chainlit as cl
+
+async def process_user_query_streaming(query: str):
+    """Stream MAS responses into a single Chainlit message, then post-process tables & code blocks."""
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(
+        api_key=DATABRICKS_TOKEN,
+        base_url=f"https://{DATABRICKS_WORKSPACE}/serving-endpoints",
+        timeout=180.0,
+    )
+
+    # Step 1: Start with one streaming message
+    msg = cl.Message(content="", author="Spirit Airlines BI Agent")
+    await msg.send()
+
+    stream = await client.responses.create(
+        model="mas-1a0aee60-endpoint",
+        input=[{"role": "user", "content": query}],
+        stream=True,
+    )
+
+    output_text = []
+    async for event in stream:
+        if event.type == "response.output_text.delta":
+            token = event.delta
+            output_text.append(token)
+            await msg.stream_token(token)
+
+        elif event.type == "response.error":
+            await msg.stream_token(f"\n\n**Error**: {event}")
+
+    # Step 2: Finalize stream
+    full_text = "".join(output_text)
+    await msg.update()
+
+    # Step 3: Extract tables
+    table_pattern = re.compile(
+        r"(\|.+\|\n(?:\|[-:]+[-| :]+\|\n)?(?:\|.*\|\n?)+)",
+        re.MULTILINE
+    )
+    tables = table_pattern.findall(full_text)
+
+    # Step 4: Extract code blocks
+    code_pattern = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
+    code_blocks = code_pattern.findall(full_text)
+
+    # Step 5: Clean text for narrative (without tables/code)
+    narrative = table_pattern.sub("", full_text)
+    narrative = code_pattern.sub("", narrative).strip()
+
+    # Step 6: Replace original message with cleaned narrative
+    if narrative:
+        msg.content = narrative
+        await msg.update()
+
+    # Step 7: Render tables (structured, not duplicate text)
+    for tbl in tables:
+        rows = [r.strip() for r in tbl.splitlines() if r.strip()]
+        if len(rows) < 2:
+            continue
+
+        headers = [h.strip() for h in rows[0].split("|")[1:-1]]
+        data = []
+        for row in rows[1:]:
+            if set(row.replace("|", "").strip()) <= {"-", ":", " "}:
+                continue
+            cols = [c.strip() for c in row.split("|")[1:-1]]
+            if len(cols) == len(headers):
+                data.append(cols)
+
+        if headers and data:
+            await cl.Table(headers=headers, rows=data).send()
+
+    # Step 8: Render code blocks
+    for lang, code in code_blocks:
+        language = lang if lang else "text"
+        await cl.Code(code, language=language).send()
+
+    return {"success": True, "content": full_text}

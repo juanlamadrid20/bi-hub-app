@@ -10,7 +10,7 @@ variables:
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "bi-agent-chat-sessions"
+    default: "bi-agent-chat-session-example"
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
@@ -19,7 +19,7 @@ variables:
   # Catalog configuration
   lakebase_database_name:
     description: "Database name for database resources"
-    default: "chat_sessions"
+    default: "databricks_postgres"
   
   synced_catalog_name:
     description: "Catalog name for database resources"
@@ -57,22 +57,24 @@ targets:
       
       apps:
         bi-agent:
-          name: "bi-agent" 
+          name: "bi-agent-new" 
           description: "AI-powered Business Intelligence Agent"
           resources:
               - name: agent-endpoint
                 serving_endpoint:
                   name: ${var.model_endpoint_name}
                   permission: "CAN_QUERY"
-              # - name: lakebase-database
-              #   database:
-              #     instance_name: ${var.lakebase_instance_name}
-              #     database_name: ${var.lakebase_database_name}
-              #     permission: "CAN_CONNECT_AND_CREATE"                    
+              - database:
+                  database_name: ${var.lakebase_database_name}
+                  instance_name: ${var.lakebase_instance_name}
+                  permission: CAN_CONNECT_AND_CREATE
+                name: database               
           source_code_path: ./src
           permissions:
             - level: "CAN_USE"
               user_name: "rohit.bhagwat@databricks.com"
+
+
 
   ## Optionally, there could be 'staging' or 'prod' targets here.
   #

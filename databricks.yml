@@ -68,7 +68,8 @@ targets:
                   database_name: ${var.lakebase_database_name}
                   instance_name: ${var.lakebase_instance_name}
                   permission: CAN_CONNECT_AND_CREATE
-                name: database               
+                name: database
+          user_api_scopes: ["serving.serving-endpoints"]
           source_code_path: ./src/app
           permissions:
             - level: "CAN_USE"

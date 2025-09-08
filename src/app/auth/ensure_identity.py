@@ -4,9 +4,28 @@ from auth.identity import Identity, OboTokenSource, PatTokenSource
 from typing import Dict
 from utils.logging import logger
 
+# Import the global headers from header.py
+from auth.header import _global_headers
 
 def _headers_getter() -> Dict[str, str]:
+    logger.info("[DEBUG] _headers_getter() called from ensure_identity")
+    
+    # Try to get headers from global storage first
+    user = cl.user_session.get("user")
+    logger.info(f"[DEBUG] User: {user}")
+    if user and user.identifier in _global_headers:
+        headers = _global_headers[user.identifier]
+        logger.info(f"[DEBUG] Found headers in global storage: {list(headers.keys())}")
+        return headers
+    
+    logger.info(f"[DEBUG] Global headers available: {list(_global_headers.keys())}")
+    
+    # Fallback to request object (might be None on Databricks)
     request = cl.user_session.get("request")
+    logger.info(f"[DEBUG] Request object: {request}")
+    if request is None:
+        logger.warning("[DEBUG] Request object is None, returning empty headers")
+        return {}
     return request.headers or {}
 
 

@@ -24,6 +24,6 @@ class PatTokenSource(TokenSource):
 
 class Identity(BaseModel):
     email: Optional[str] = None
-    display_name: str
+    display_name: Optional[str] = None
     auth_type: Literal["obo", "pat"] = "pat"
     token_source: Any = Field(repr=False)

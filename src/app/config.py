@@ -89,8 +89,8 @@ print(f"Environment Variables: {env_vars}")
 filtered_vars = {k: v for k, v in env_vars.items() if v is not None}
 
 settings = Settings(
-    enable_header_auth=False,
-    enable_password_auth=True,
+    enable_header_auth=True,
+    enable_password_auth=False,
     **filtered_vars
 )
 

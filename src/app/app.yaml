@@ -7,3 +7,6 @@ env:
   
   - name: DATABASE_INSTANCE
     value: "bi-agent-chat-session"
+
+  - name: SERVING_ENDPOINT
+    value: "mas-1a0aee60-endpoint"

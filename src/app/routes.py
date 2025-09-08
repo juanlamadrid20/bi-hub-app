@@ -103,7 +103,7 @@ async def on_message(message: cl.Message):
     await renderer.start()
 
     try:
-        raw_events = mas_client.stram_raw(identity, messages)
+        raw_events = mas_client.stream_raw(identity, messages)
         async for event in normalize(raw_events):
             if event["type"] == "text.delta":
                 await renderer.on_text_delta(event["delta"])

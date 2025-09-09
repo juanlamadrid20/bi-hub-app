@@ -43,8 +43,10 @@ class MASChatClient:
             raise RuntimeError("Missing bearer token")
 
         if identity.auth_type == "pat":
-            async for ev in self._stream_openai(bearer, messages):
+            async for ev in self._stream_rest_sse(bearer, messages):
                 yield ev
+            # async for ev in self._stream_openai(bearer, messages): Commented out for now as it is causing issues with out of order events
+            #     yield ev
         else:
             # Default to OBO path
             async for ev in self._stream_rest_sse(bearer, messages):
@@ -97,12 +99,15 @@ class MASChatClient:
         Streaming via OpenAI-compatible SDK (works well with PAT).
         Yields SDK event objects (your normalizer already handles getattr/ dict).
         """
+        logger.info(f"[DEBUG] _stream_openai called with bearer: {bearer}")
+        logger.info(f"[DEBUG] token length: {len(bearer)}")
         client = self._client_openai(bearer)
         async with client.responses.stream(
             model=self._endpoint,
             input=messages,
         ) as stream:
             async for event in stream:
+                logger.info(f"[DEBUG] OpenAI stream event: {event}")
                 yield event
             # If you want the final consolidated response:
             # final = await stream.get_final_response()

@@ -20,7 +20,7 @@ databricks bundle run --profile <PROFILE>
 - `databricks.yml` — workspace host, app name, database instance name, MAS endpoint
 - `src/app/.chainlit/config.toml` — Chainlit settings, branding
 - `src/app/public/images/logo.svg` — your logo
-- `src/app/app.yaml` — app-specific names (cannot use bundle variables)
+- `src/app/app.yaml` — app-specific names and environment variables (there's a known issue that variables can't be used in app.yaml from the bundle file)
 
 **Local Development:**
 ```bash
@@ -29,6 +29,10 @@ pip install -r requirements.txt
 # Set env vars: DATABRICKS_TOKEN, PGHOST, SERVING_ENDPOINT, etc.
 chainlit run app.py -w
 ```
+
+**Authentication Notes:**
+- **Databricks Apps**: Uses OBO/SSO (configured via environment variables in app.yaml)
+- **Local Dev**: Uses password auth + PAT (set `DATABRICKS_TOKEN` environment variable)
 
 **What you get:**
 - Streaming responses from MAS

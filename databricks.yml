@@ -33,6 +33,10 @@ variables:
     description: "User name for permissions"
     default: "rohit.bhagwat@databricks.com"
 
+sync:
+  exclude:
+    - src/app/.env  
+
 targets:
   dev:
     mode: development

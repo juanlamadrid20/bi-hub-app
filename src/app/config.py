@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # Chat 
     history_max_turns: int = 10
-    history_max_chars: int = 12000
+    history_max_chars: int = 120000
 
     chat_starter_messages: List[Dict[str, str]] = [
         {"label": "Revenue Analytics", "message": "Analyze the overall revenue by Segments in 2024"}, 
@@ -71,6 +71,8 @@ class Settings(BaseSettings):
 
 # Create settings instance with environment variables
 env_vars = {
+    'enable_header_auth': os.getenv("ENABLE_HEADER_AUTH"),
+    'enable_password_auth': os.getenv("ENABLE_PASSWORD_AUTH"),
     'pg_database_instance': os.getenv("DATABASE_INSTANCE"),
     'pg_host': os.getenv("PGHOST"),
     'pg_port': int(os.getenv("PGPORT", 5432)),
@@ -89,9 +91,7 @@ print(f"Environment Variables: {env_vars}")
 filtered_vars = {k: v for k, v in env_vars.items() if v is not None}
 
 settings = Settings(
-    enable_header_auth=False,
-    enable_password_auth=True,
     **filtered_vars
 )
 
-# logger.info(f"Settings: {settings}")
+logger.info(f"Settings: {settings}")

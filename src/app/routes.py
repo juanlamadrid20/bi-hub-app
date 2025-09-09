@@ -9,7 +9,7 @@ from config import settings
 mas_client = MASChatClient()
 
 HIST_MAX_TURNS = settings.history_max_turns
-HIST_MAX_CHARS = settings.history_max_turns
+HIST_MAX_CHARS = settings.history_max_chars
 
 def _msg_char_len(msg: dict) -> int:
     """Heuristic length of a message's content; works for string content."""
@@ -106,7 +106,10 @@ async def on_message(message: cl.Message):
     try:
         raw_events = mas_client.stream_raw(identity, messages)
         async for event in normalize(raw_events):
-            if event["type"] == "text.delta":
+            if event["type"] == "response.created":
+                # Acknowledge the response.created event
+                logger.info(f"[DEBUG] Acknowledged response.created event")
+            elif event["type"] == "text.delta":
                 await renderer.on_text_delta(event["delta"])
             elif event["type"] == "text.done":
                 await renderer.on_text_done(event["text"])

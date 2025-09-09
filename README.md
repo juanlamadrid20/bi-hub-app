@@ -2,6 +2,9 @@
 
 A Databricks App built with Chainlit that provides an intelligent chat interface for BI analytics. It integrates with Multi-Agent Supervisor (MAS) for reasoning and uses Lakebase (PostgreSQL) for session state and chat history.
 
+
+![Architecture Diagram](architecture.svg)
+
 ## Quick Start
 
 **Deploy with Databricks Asset Bundles:**
@@ -47,7 +50,7 @@ chainlit run app.py -w
 | Databricks App | OBO | SSE to `/invocations` (REST) | Service Principal |
 | Local Development | PAT | OpenAI Async client (`responses.*`) | Service Principal |
 
-**Known:** OpenAI SDK + OBO can 403 ("invalid scope"). We bypass with SSE on OBO.
+**Known:** OpenAI SDK + OBO can result in 403 errors ("invalid scope"). We bypass with querying the MAS endpoint directly instead of using OpenAI Client on OBO.
 
 ## What you get
 
@@ -74,7 +77,7 @@ chainlit run app.py -w
 export CHAINLIT_DEBUG=true
 ```
 
-## Optional Diagrams
+## Diagrams
 
 <details>
 <summary><strong>Auth init & MAS call flow</strong></summary>
@@ -117,5 +120,3 @@ flowchart LR
 - Databricks CLI ≥ 0.267.0 (Apps)
 - MAS endpoint + Lakebase instance
 - `requirements.txt` in `src/app` (pinned)
-
-If you want, I can also add a one-line "Makefile" target (`make dev`, `make deploy`) to wrap the common commands and keep the README even leaner.

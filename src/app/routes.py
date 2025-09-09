@@ -98,6 +98,7 @@ async def on_message(message: cl.Message):
     logger.info(f"Identity: {identity}")
 
     messages = _build_messages_with_history(message.content)
+    logger.info(f"[DEBUG] Messages: {messages}")
 
     renderer = ChainlitStream()
     await renderer.start()

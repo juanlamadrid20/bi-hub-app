@@ -7,6 +7,10 @@ bundle:
 
 # Variables for environment-specific configuration
 variables:
+  
+  app_name:
+    description: "App name"
+    default: "bi-agent"
 
   lakebase_instance_name:
     description: "Database instance name"
@@ -14,7 +18,7 @@ variables:
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "mas-1a0aee60-endpoint"  
+    default: "mas-1a0aee60-endpoint"
   
   # Catalog configuration
   lakebase_database_name:
@@ -24,6 +28,10 @@ variables:
   synced_catalog_name:
     description: "Catalog name for database resources"
     default: "bi_agent_chat_sessions"
+  
+  user_name:
+    description: "User name for permissions"
+    default: "rohit.bhagwat@databricks.com"
 
 targets:
   dev:
@@ -39,16 +47,29 @@ targets:
           description: "Setup Lakebase PostgreSQL database and tables for development"
           tasks:
             - task_key: "setup_database"
-              spark_python_task:
-                python_file: "./src/scripts/setup_chainlit_schema.py"
+              notebook_task:
+                notebook_path: "./src/scripts/setup_chainlit_lakebase.ipynb"
               environment_key: "default"
           environments:
             - environment_key: "default"
               spec:
-                environment_version: "1"
+                environment_version: "4"
+                dependencies:
+                  - sqlalchemy==2.0.43
+                  - psycopg[binary]==3.2.9
+                  - databricks-sdk==0.65.0
+          parameters:
+            - name: instance_name
+              default: ${var.lakebase_instance_name}
+            - name: database
+              default: ${var.lakebase_database_name}
+            - name: app_name
+              default: ${var.app_name}
+            - name: port
+              default: "5432"
           permissions:
             - level: "CAN_MANAGE"
-              user_name: "rohit.bhagwat@databricks.com"
+              user_name: ${var.user_name}
 
       database_instances:
         lakebase_postgres:
@@ -57,7 +78,7 @@ targets:
       
       apps:
         bi-agent:
-          name: "bi-agent" 
+          name: ${var.app_name} 
           description: "AI-powered Business Intelligence Agent"
           resources:
               - name: agent-endpoint
@@ -73,12 +94,4 @@ targets:
           source_code_path: ./src/app
           permissions:
             - level: "CAN_USE"
-              user_name: "rohit.bhagwat@databricks.com"
-
-
-
-  ## Optionally, there could be 'staging' or 'prod' targets here.
-  #
-  # prod:
-  #   workspace:
-  #     host: https://adb-984752964297111.11.azuredatabricks.net
+              user_name: ${var.user_name}

@@ -61,7 +61,7 @@ enable_thread_management = true
 
 [UI]
 # Name of the assistant
-name = "Spirit Airlines AI Agent"
+name = "AI Agent"
 
 # Sidebar configuration
 default_sidebar_state = "open"
@@ -71,12 +71,11 @@ show_sidebar = true
 cot = "full"
 
 # Custom Spirit Airlines branding
-custom_css = "public/css/spirit-branding.css"
-# custom_js = "public/js/spirit-banner.js"
+custom_css = "public/css/custom-branding.css"
 
 # Spirit Airlines logo and branding
-logo_file_url = "public/images/spirit-logo.svg"
-login_page_image = "public/images/spirit-logo.svg"
+logo_file_url = "public/images/logo.svg"
+login_page_image = "public/images/logo.svg"
 
 # Enable markdown and HTML rendering
 enable_markdown = true

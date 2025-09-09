@@ -3,6 +3,21 @@
 A Databricks App built with Chainlit that provides an intelligent chat interface for BI analytics. It integrates with Multi-Agent Supervisor (MAS) for reasoning and uses Lakebase (PostgreSQL) for session state and chat history.
 
 
+## Key Features
+
+**Chainlit Implementation**
+- **Persistent Chat History**: Uses Lakebase (PostgreSQL) with Chainlit Data Layer for session and chat persistence
+- **Customizable UI**: Minimal Chainlit interface with easy branding customization
+- **Real-time Streaming**: Responses stream directly to users for immediate feedback
+
+**Databricks Integration**
+- **Multi Agent Supervisor**: Routes queries across Genie Spaces and Knowledge Assistants for consolidated responses
+- **Secure Model Access**: Leverages OBO (On-Behalf-Of) tokens to query Model Serving endpoints and Genie requests
+- **Unity Catalog Integration**: Applies table, row, and column-level security through Unity Catalog permissions
+- **Lakebase (Postgres)**: Stores session state and chat history 
+- **Comprehensive Logging**: MAS traces logged via MLflow 3.0 and can be loaded into Delta tables
+
+
 ![Architecture Diagram](architecture.svg)
 
 ## Quick Start

@@ -164,12 +164,40 @@
   border-color: #000000 !important;
 }
 
-/* User messages - Spirit yellow */
+/* User messages - Spirit yellow with enhanced dark mode visibility */
 [data-testid="message"][data-testid="user-message"] {
   background: linear-gradient(135deg, #ffcc00 0%, #ffd633 100%) !important;
   color: #000000 !important;
-  border-color: #000000 !important;
+  border: 2px solid #000000 !important;
   margin-left: 40px !important;
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Override any inherited text colors in user messages - more specific selectors */
+[data-testid="message"][data-testid="user-message"] *,
+[data-testid="message"][data-testid="user-message"] p,
+[data-testid="message"][data-testid="user-message"] div,
+[data-testid="message"][data-testid="user-message"] span,
+[data-testid="message"][data-testid="user-message"] strong,
+[data-testid="message"][data-testid="user-message"] em,
+[data-testid="message"][data-testid="user-message"] code,
+[data-testid="message"][data-testid="user-message"] pre {
+  color: #000000 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Enhanced dark mode visibility */
+@media (prefers-color-scheme: dark) {
+  [data-testid="message"][data-testid="user-message"] {
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5) !important;
+  }
+}
+
+/* Dark mode theme handling */
+[data-theme="dark"] [data-testid="message"][data-testid="user-message"],
+.dark [data-testid="message"][data-testid="user-message"] {
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5) !important;
 }
 
 /* Assistant messages - Clean white with black borders */
@@ -405,6 +433,19 @@ body::before {
   --spirit-black: #000000;
   --spirit-white: #ffffff;
   --spirit-gray: #666666;
+}
+
+/* ========================================
+   USER MESSAGE TEXT VISIBILITY
+   ======================================== */
+
+/* Ensure black text on yellow user message backgrounds */
+[data-testid="message"][data-testid="user-message"] {
+  color: #000000 !important;
+}
+
+[data-testid="message"][data-testid="user-message"] * {
+  color: #000000 !important;
 }
 
 /* ========================================

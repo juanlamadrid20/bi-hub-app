@@ -23,7 +23,10 @@ class Settings(BaseSettings):
     def pg_connection_string(self) -> str:
         return f"postgresql+psycopg://{self.pg_user}:@{self.pg_host}:{self.pg_port}/{self.pg_database}?sslmode={self.pg_sslmode}"
 
-    logger.info(f"Database Instance: {pg_database_instance}") 
+    @property
+    def log_database_instance(self) -> str:
+        logger.info(f"Database Instance: {self.pg_database_instance}")
+        return self.pg_database_instance 
 
     # Workspace
     databricks_host: Optional[str] = None

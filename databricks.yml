@@ -10,15 +10,15 @@ variables:
   
   app_name:
     description: "App name"
-    default: "bi-agent"
+    default: "bi-agent-jl"
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "bi-agent-chat-session"
+    default: "lakebase-chat-sessions-jl"
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "mas-1a0aee60-endpoint"
+    default: "ka-a05b7a34-endpoint"
   
   # Catalog configuration
   lakebase_database_name:
@@ -31,7 +31,7 @@ variables:
   
   user_name:
     description: "User name for permissions"
-    default: "rohit.bhagwat@databricks.com"
+    default: "juan.lamadrid@databricks.com"
 
 sync:
   exclude:
@@ -42,7 +42,7 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://adb-984752964297111.11.azuredatabricks.net
+      host: https://e2-demo-field-eng.cloud.databricks.com
     
     resources:
       jobs:

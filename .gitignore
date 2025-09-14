@@ -56,3 +56,4 @@ ehthumbs.db
 .coverage
 htmlcov/
 .coverage.*
+.DS_Store

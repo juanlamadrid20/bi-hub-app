@@ -10,15 +10,11 @@ variables:
   
   app_name:
     description: "App name"
-    default: "bi-agent-jl"
+    default: "bi-hub-app"
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "lakebase-chat-sessions-jl"
-
-  model_endpoint_name:
-    description: "Databricks model serving endpoint name"
-    default: "ka-a05b7a34-endpoint"
+    default: "juan-pg"
   
   # Catalog configuration
   lakebase_database_name:
@@ -27,7 +23,11 @@ variables:
   
   synced_catalog_name:
     description: "Catalog name for database resources"
-    default: "bi_agent_chat_sessions"
+    default: "juan_pg"
+
+  model_endpoint_name:
+    description: "Databricks model serving endpoint name"
+    default: "ka-a05b7a34-endpoint"
   
   user_name:
     description: "User name for permissions"
@@ -75,10 +75,10 @@ targets:
             - level: "CAN_MANAGE"
               user_name: ${var.user_name}
 
-      database_instances:
-        lakebase_postgres:
-          name: ${var.lakebase_instance_name}
-          capacity: "CU_1"
+      # database_instances:
+      #   lakebase_postgres:
+      #     name: ${var.lakebase_instance_name}
+      #     capacity: "CU_1"
       
       apps:
         bi-agent:

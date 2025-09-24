@@ -1,27 +1,27 @@
-/* SPIRIT AIRLINES - BOLD, BUDGET, IN-YOUR-FACE BRANDING */
+/* ABERCROMBIE & FITCH - MODERN BLUE BRANDING */
 
-/* Import Spirit Airlines font weights */
+/* Import Inter font weights */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ========================================
-   GLOBAL SPIRIT TRANSFORMATION
+   GLOBAL ABERCROMBIE & FITCH TRANSFORMATION
    ======================================== */
 
-/* Make everything feel like Spirit's platform */
+/* Make everything feel like A&F's modern platform */
 * {
   font-family: 'Inter', sans-serif;
-  font-weight: 600; /* Spirit is bold, not subtle */
+  font-weight: 500; /* A&F is sophisticated, not overly bold */
 }
 
 /* ========================================
-   HEADER - SPIRIT AIRLINES BANNER
+   HEADER - ABERCROMBIE & FITCH BANNER
    ======================================== */
 
-/* Transform the header to look like Spirit's actual platform */
+/* Transform the header to look like A&F's platform */
 [data-testid="header"] {
-  background: linear-gradient(135deg, #ffcc00 0%, #ffd633 50%, #ffcc00 100%) !important;
-  border-bottom: 4px solid #000000 !important;
-  box-shadow: 0 4px 20px rgba(255, 204, 0, 0.3) !important;
+  background: linear-gradient(135deg, #0080ff 0%, #1a73e8 50%, #0080ff 100%) !important;
+  border-bottom: 4px solid #003366 !important;
+  box-shadow: 0 4px 20px rgba(0, 128, 255, 0.3) !important;
   position: relative;
   overflow: hidden;
   height: 80px !important;
@@ -31,18 +31,18 @@
   padding: 0 30px !important;
 }
 
-/* Add Spirit Airlines logo and branding */
+/* Add Abercrombie & Fitch logo and branding */
 [data-testid="header"]::before {
-  content: "✈️ SPIRIT AIRLINES";
+  content: "🦌 ABERCROMBIE & FITCH";
   position: absolute;
   left: 30px;
   top: 50%;
   transform: translateY(-50%);
-  font-weight: 900;
-  font-size: 28px;
-  color: #000000;
-  text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
-  letter-spacing: 3px;
+  font-weight: 700;
+  font-size: 24px;
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 51, 102, 0.5);
+  letter-spacing: 2px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -50,20 +50,21 @@
 
 /* Add tagline */
 [data-testid="header"]::after {
-  content: "LESS MONEY. MORE GO.";
+  content: "CASUAL LUXURY";
   position: absolute;
   right: 30px;
   top: 50%;
   transform: translateY(-50%);
-  font-weight: 700;
-  font-size: 16px;
-  color: #000000;
+  font-weight: 600;
+  font-size: 14px;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 2px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
   border-radius: 20px;
-  border: 2px solid #000000;
+  border: 2px solid #ffffff;
+  backdrop-filter: blur(10px);
 }
 
 /* Hide the default header content */
@@ -71,52 +72,30 @@
   opacity: 0.1;
 }
 
-/* Banner temporarily disabled to fix layout issues */
-/* body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #ffcc00;
-  border-bottom: 2px solid #000000;
-  z-index: 9999 !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-} */
-
-/* Banner adjustments removed - using default Chainlit layout */
-
-/* Layout fixes removed - back to default Chainlit behavior */
-
 /* ========================================
-   SIDEBAR - BLACK WITH YELLOW ACCENTS
+   SIDEBAR - NAVY WITH BLUE ACCENTS
    ======================================== */
 
-/* Make sidebar feel like Spirit's dark, premium aesthetic */
+/* Make sidebar feel like A&F's premium aesthetic */
 [data-testid="sidebar"] {
-  background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%) !important;
-  border-right: 3px solid #ffcc00 !important;
-  box-shadow: 4px 0 20px rgba(255, 204, 0, 0.2) !important;
+  background: linear-gradient(180deg, #003366 0%, #1a4d73 100%) !important;
+  border-right: 3px solid #0080ff !important;
+  box-shadow: 4px 0 20px rgba(0, 128, 255, 0.2) !important;
 }
 
-/* Sidebar header with Spirit branding */
+/* Sidebar header with A&F branding */
 [data-testid="sidebar"] [data-testid="sidebar-header"] {
-  background: #ffcc00 !important;
-  color: #000000 !important;
-  border-bottom: 3px solid #000000 !important;
+  background: #0080ff !important;
+  color: #ffffff !important;
+  border-bottom: 3px solid #003366 !important;
   padding: 20px !important;
   text-align: center;
 }
 
-/* Add Spirit logo to sidebar */
+/* Add A&F logo to sidebar */
 [data-testid="sidebar"] [data-testid="sidebar-header"]::before {
-  content: "✈️ SPIRIT";
-  font-weight: 900;
+  content: "🦌 A&F";
+  font-weight: 700;
   font-size: 18px;
   display: block;
   margin-bottom: 5px;
@@ -126,55 +105,55 @@
 [data-testid="sidebar"] [role="button"],
 [data-testid="sidebar"] button {
   background: transparent !important;
-  color: #ffcc00 !important;
+  color: #33a3ff !important;
   border: 2px solid transparent !important;
   border-radius: 8px !important;
   margin: 8px 0 !important;
   padding: 12px 16px !important;
-  font-weight: 600 !important;
-  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
 }
 
 [data-testid="sidebar"] [role="button"]:hover,
 [data-testid="sidebar"] button:hover {
-  background: #ffcc00 !important;
-  color: #000000 !important;
-  border-color: #ffcc00 !important;
+  background: #0080ff !important;
+  color: #ffffff !important;
+  border-color: #0080ff !important;
   transform: translateX(5px) !important;
-  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.4) !important;
 }
 
 /* ========================================
-   MAIN CONTENT - SPIRIT STYLE
+   MAIN CONTENT - A&F STYLE
    ======================================== */
 
-/* Message styling with Spirit's bold approach */
+/* Message styling with A&F's refined approach */
 [data-testid="message"] {
   border-radius: 12px !important;
-  border: 2px solid #ffcc00 !important;
+  border: 2px solid #0080ff !important;
   margin: 20px 0 !important;
   padding: 20px !important;
-  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.1) !important;
   transition: all 0.3s ease !important;
 }
 
 [data-testid="message"]:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 8px 25px rgba(255, 204, 0, 0.2) !important;
-  border-color: #000000 !important;
+  box-shadow: 0 8px 25px rgba(0, 128, 255, 0.2) !important;
+  border-color: #1a73e8 !important;
 }
 
-/* User messages - Spirit yellow with enhanced dark mode visibility */
+/* User messages - A&F blue with enhanced visibility */
 [data-testid="message"][data-testid="user-message"] {
-  background: linear-gradient(135deg, #ffcc00 0%, #ffd633 100%) !important;
-  color: #000000 !important;
-  border: 2px solid #000000 !important;
+  background: linear-gradient(135deg, #0080ff 0%, #33a3ff 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #003366 !important;
   margin-left: 40px !important;
-  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3) !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.3) !important;
+  text-shadow: 1px 1px 2px rgba(0, 51, 102, 0.3) !important;
 }
 
-/* Override any inherited text colors in user messages - more specific selectors */
+/* Override any inherited text colors in user messages */
 [data-testid="message"][data-testid="user-message"] *,
 [data-testid="message"][data-testid="user-message"] p,
 [data-testid="message"][data-testid="user-message"] div,
@@ -183,51 +162,51 @@
 [data-testid="message"][data-testid="user-message"] em,
 [data-testid="message"][data-testid="user-message"] code,
 [data-testid="message"][data-testid="user-message"] pre {
-  color: #000000 !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 51, 102, 0.5) !important;
 }
 
 /* Enhanced dark mode visibility */
 @media (prefers-color-scheme: dark) {
   [data-testid="message"][data-testid="user-message"] {
-    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5) !important;
+    box-shadow: 0 4px 15px rgba(0, 128, 255, 0.5) !important;
   }
 }
 
 /* Dark mode theme handling */
 [data-theme="dark"] [data-testid="message"][data-testid="user-message"],
 .dark [data-testid="message"][data-testid="user-message"] {
-  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.5) !important;
 }
 
-/* Assistant messages - Clean white with black borders */
+/* Assistant messages - Clean white with blue borders */
 [data-testid="message"][data-testid="assistant-message"] {
   background: #ffffff !important;
-  color: #000000 !important;
-  border-color: #000000 !important;
+  color: #003366 !important;
+  border-color: #1a73e8 !important;
   margin-right: 40px !important;
-  border-left: 6px solid #ffcc00 !important;
+  border-left: 6px solid #0080ff !important;
 }
 
 /* Message author styling */
 [data-testid="message"] [data-testid="message-author"] {
-  font-weight: 800 !important;
-  color: #000000 !important;
+  font-weight: 600 !important;
+  color: #003366 !important;
   margin-bottom: 10px !important;
   text-transform: uppercase !important;
   letter-spacing: 1px !important;
 }
 
 /* ========================================
-   INPUT AREA - SPIRIT'S BOLD STYLE
+   INPUT AREA - A&F'S REFINED STYLE
    ======================================== */
 
-/* Transform input to feel like Spirit's booking interface */
+/* Transform input to feel like A&F's interface */
 [data-testid="input-container"] {
-  background: #000000 !important;
-  border: 3px solid #ffcc00 !important;
+  background: #003366 !important;
+  border: 3px solid #0080ff !important;
   border-radius: 15px !important;
-  box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(0, 128, 255, 0.3) !important;
   margin: 20px !important;
   padding: 5px !important;
 }
@@ -235,11 +214,11 @@
 /* Input field styling */
 [data-testid="input-container"] input,
 [data-testid="input-container"] textarea {
-  background: #000000 !important;
-  color: #ffcc00 !important;
+  background: #003366 !important;
+  color: #33a3ff !important;
   border: none !important;
   font-size: 16px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   padding: 15px 20px !important;
   outline: none !important;
   width: 100% !important;
@@ -247,47 +226,47 @@
 
 [data-testid="input-container"] input::placeholder,
 [data-testid="input-container"] textarea::placeholder {
-  color: #ffcc00 !important;
+  color: #33a3ff !important;
   opacity: 0.7 !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
 }
 
 [data-testid="input-container"] input:focus,
 [data-testid="input-container"] textarea:focus {
-  background: #000000 !important;
-  box-shadow: inset 0 0 0 2px #ffcc00 !important;
+  background: #003366 !important;
+  box-shadow: inset 0 0 0 2px #0080ff !important;
 }
 
-/* Send button - Spirit yellow */
+/* Send button - A&F blue */
 [data-testid="input-container"] button {
-  background: #ffcc00 !important;
-  color: #000000 !important;
+  background: #0080ff !important;
+  color: #ffffff !important;
   border: none !important;
   border-radius: 10px !important;
   padding: 12px 20px !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   font-size: 16px !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   text-transform: uppercase !important;
   letter-spacing: 1px !important;
 }
 
 [data-testid="input-container"] button:hover {
-  background: #000000 !important;
-  color: #ffcc00 !important;
-  border: 2px solid #ffcc00 !important;
+  background: #1a73e8 !important;
+  color: #ffffff !important;
+  border: 2px solid #33a3ff !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(0, 128, 255, 0.4) !important;
 }
 
 /* ========================================
-   SPECIAL SPIRIT ELEMENTS
+   SPECIAL A&F ELEMENTS
    ======================================== */
 
-/* Add Spirit Airlines watermark */
+/* Add A&F watermark */
 body::before {
-  content: "✈️";
+  content: "🦌";
   position: fixed;
   top: 50%;
   left: 50%;
@@ -298,27 +277,27 @@ body::before {
   z-index: -1;
 }
 
-/* Add Spirit branding to page title */
+/* Add A&F branding to page title */
 [data-testid="header"] h1,
 [data-testid="header"] h2,
 [data-testid="header"] h3 {
-  color: #000000 !important;
-  font-weight: 900 !important;
-  text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 2px 2px 4px rgba(0, 51, 102, 0.5) !important;
 }
 
 /* ========================================
-   ANIMATIONS - SPIRIT'S ENERGY
+   ANIMATIONS - A&F'S SOPHISTICATED ENERGY
    ======================================== */
 
-/* Add subtle animations that feel like Spirit's dynamic brand */
-@keyframes spiritPulse {
+/* Add subtle animations that feel like A&F's refined brand */
+@keyframes afPulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  50% { transform: scale(1.01); }
 }
 
 [data-testid="message"]:hover {
-  animation: spiritPulse 0.6s ease-in-out;
+  animation: afPulse 0.8s ease-in-out;
 }
 
 /* ========================================
@@ -392,18 +371,18 @@ body::before {
 }
 
 /* ========================================
-   RESPONSIVE SPIRIT DESIGN
+   RESPONSIVE A&F DESIGN
    ======================================== */
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
   [data-testid="header"]::before {
-    font-size: 18px;
+    font-size: 16px;
     left: 10px;
   }
   
   [data-testid="header"]::after {
-    font-size: 12px;
+    font-size: 10px;
     right: 10px;
   }
   
@@ -411,76 +390,68 @@ body::before {
     margin-left: 20px !important;
     margin-right: 20px !important;
   }
-  
-  /* Mobile banner adjustments */
-  body::before {
-    height: 50px;
-    padding: 0 15px;
-  }
-  
-  [data-testid="main"] {
-    margin-top: 50px !important;
-  }
 }
 
 /* ========================================
-   SPIRIT AIRLINES BRAND COLORS
+   ABERCROMBIE & FITCH BRAND COLORS
    ======================================== */
 
-/* These are the actual Spirit Airlines brand colors */
+/* These are the new A&F brand colors */
 :root {
-  --spirit-yellow: #ffcc00;
-  --spirit-black: #000000;
-  --spirit-white: #ffffff;
-  --spirit-gray: #666666;
+  --af-primary-blue: #0080ff;
+  --af-secondary-blue: #1a73e8;
+  --af-accent-blue: #33a3ff;
+  --af-navy: #003366;
+  --af-light-blue: #f0f8ff;
+  --af-white: #ffffff;
 }
 
 /* ========================================
    USER MESSAGE TEXT VISIBILITY
    ======================================== */
 
-/* Ensure black text on yellow user message backgrounds */
+/* Ensure white text on blue user message backgrounds */
 [data-testid="message"][data-testid="user-message"] {
-  color: #000000 !important;
+  color: #ffffff !important;
 }
 
 [data-testid="message"][data-testid="user-message"] * {
-  color: #000000 !important;
+  color: #ffffff !important;
 }
 
 /* ========================================
-   UTILITY CLASSES FOR SPIRIT STYLING
+   UTILITY CLASSES FOR A&F STYLING
    ======================================== */
 
-.spirit-badge {
-  background: #ffcc00;
-  color: #000000;
+.af-badge {
+  background: #0080ff;
+  color: #ffffff;
   padding: 4px 12px;
   border-radius: 20px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.spirit-alert {
-  background: #ffcc00;
-  color: #000000;
-  border: 2px solid #000000;
+.af-alert {
+  background: #0080ff;
+  color: #ffffff;
+  border: 2px solid #003366;
   border-radius: 8px;
   padding: 15px;
   margin: 15px 0;
-  font-weight: 600;
+  font-weight: 500;
   text-align: center;
 }
 
-.spirit-highlight {
-  background: linear-gradient(135deg, #ffcc00 0%, #ffd633 100%);
-  color: #000000;
+.af-highlight {
+  background: linear-gradient(135deg, #0080ff 0%, #33a3ff 100%);
+  color: #ffffff;
   padding: 20px;
   border-radius: 12px;
-  border: 3px solid #000000;
-  font-weight: 700;
+  border: 3px solid #003366;
+  font-weight: 600;
   text-align: center;
-  box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 128, 255, 0.3);
 }

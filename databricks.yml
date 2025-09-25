@@ -52,7 +52,7 @@ targets:
           tasks:
             - task_key: "setup_database"
               notebook_task:
-                notebook_path: "./src/scripts/setup_chainlit_lakebase.ipynb"
+                notebook_path: "./jobs/setup_chainlit_lakebase.ipynb"
               environment_key: "default"
           environments:
             - environment_key: "default"

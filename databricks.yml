@@ -14,16 +14,12 @@ variables:
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "juan-pg"
+    default: "cx-live-demo-no-delete"
   
   # Catalog configuration
   lakebase_database_name:
     description: "Database name for database resources"
     default: "databricks_postgres"
-  
-  synced_catalog_name:
-    description: "Catalog name for database resources"
-    default: "juan_pg"
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"

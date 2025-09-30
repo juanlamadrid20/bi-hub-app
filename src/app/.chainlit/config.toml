@@ -74,8 +74,8 @@ cot = "full"
 custom_css = "public/css/custom-branding.css"
 
 # Abercrombie & Fitch logo and branding
-logo_file_url = "public/images/af.png"
-login_page_image = "public/images/af.png"
+logo_file_url = "public/images/main.png"
+login_page_image = "public/images/main.png"
 
 # Enable markdown and HTML rendering
 enable_markdown = true

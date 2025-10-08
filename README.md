@@ -1,6 +1,7 @@
 # BI Hub App — AI-Powered Business Intelligence Agent
 
-A Databricks App built with Chainlit that provides an intelligent chat interface for BI analytics. It integrates with Multi-Agent Supervisor (MAS) for reasoning and uses Lakebase (PostgreSQL) for session state and chat history.
+A Databricks App built with Chainlit that provides an intelligent chat interface for Knowledge Q&A. 
+It integrates with Agent Bricks (KA) and uses Lakebase (PostgreSQL) for session state and chat history.
 
 
 ## Key Features
@@ -16,41 +17,6 @@ A Databricks App built with Chainlit that provides an intelligent chat interface
 - **Unity Catalog Integration**: Applies table, row, and column-level security through Unity Catalog permissions
 - **Lakebase (Postgres)**: Stores session state and chat history 
 - **Comprehensive Logging**: MAS traces logged via MLflow 3.0 and can be loaded into Delta tables
-
-![Architecture Diagram](architecture.svg)
-
-
-## Example 
-
-![Demo](demo.gif)
-
-## Quick Start
-
-**Deploy with Databricks Asset Bundles:**
-```bash
-git clone <repo-url>
-cd bi-hub-app
-# Update databricks.yml with your workspace/targets
-# Update src/app/.chainlit/config.toml for branding
-databricks bundle validate --profile <PROFILE>
-databricks bundle deploy --profile <PROFILE>
-databricks bundle run --profile <PROFILE>
-# Run Job first, then App
-```
-
-**Key files to configure before deploying:**
-- `databricks.yml` — workspace host, app name, database instance name, MAS endpoint
-- `src/app/.chainlit/config.toml` — Chainlit settings, branding
-- `src/app/public/images/logo.svg` — your logo
-- `src/app/app.yaml` — app-specific names and environment variables (there's a known issue that variables can't be used in app.yaml from the bundle file)
-
-**Local Development:**
-```bash
-cd src/app
-pip install -r requirements.txt
-# Set env vars: DATABRICKS_TOKEN, PGHOST, SERVING_ENDPOINT, etc.
-chainlit run app.py -w
-```
 
 **Authentication Notes:**
 - **Databricks Apps**: Uses OBO/SSO (configured via environment variables in app.yaml)
@@ -69,11 +35,9 @@ chainlit run app.py -w
 | Databricks App | OBO | SSE to `/invocations` (REST) | Service Principal |
 | Local Development | PAT | OpenAI Async client (`responses.*`) | Service Principal |
 
-**Known:** OpenAI SDK + OBO can result in 403 errors ("invalid scope"). We bypass with querying the MAS endpoint directly instead of using OpenAI Client on OBO.
-
 ## What you get
 
-- Streaming MAS responses
+- Streaming KA responses
 - Tool calls shown in a status block (always above)
 - Tables auto-formatted when pipe-tables are detected
 - Chat history persisted (resumable threads)
@@ -90,48 +54,6 @@ chainlit run app.py -w
 - **"password authentication failed" to Lakebase** → SP perms/expired cred (we auto-invalidate and refresh)
 - **No streaming** → ensure OBO path uses SSE (`Accept: text/event-stream`) and payload key is `input=[...]` (not `messages`)
 - **Local** → set `DATABRICKS_TOKEN` (PAT) and use OpenAI client path
-
-**Enable debug:**
-```bash
-export CHAINLIT_DEBUG=true
-```
-
-## Diagrams
-
-<details>
-<summary><strong>Auth init & MAS call flow</strong></summary>
-
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant A as Databricks App (SSO)
-  participant CL as Chainlit
-  participant ID as Identity(TokenSource)
-  participant MAS as MAS Serving Endpoint
-
-  U->>A: Open app (SSO)
-  A->>CL: Forward OBO headers
-  CL->>ID: Build Identity with OboTokenSource
-  ID-->>CL: bearer() → OBO token
-  CL->>MAS: POST /invocations (SSE) with Bearer
-  MAS-->>CL: stream events (delta/tool/done)
-  CL-->>U: status on top, answer streams below
-```
-
-</details>
-
-<details>
-<summary><strong>Lakebase credential flow (no OBO)</strong></summary>
-
-```mermaid
-flowchart LR
-  SP[Service Principal] --> WSC[WorkspaceClient]
-  WSC --> GDC[generate_database_credential]
-  GDC -->|ephemeral DB password| SA[(SQLAlchemy Engine)]
-  SA --> PG[(Lakebase Postgres)]
-```
-
-</details>
 
 ## Requirements (brief)
 

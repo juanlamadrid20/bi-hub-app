@@ -70,12 +70,12 @@ show_sidebar = true
 # Chain of Thought display mode
 cot = "full"
 
-# Custom Spirit Airlines branding
+# Custom Abercrombie & Fitch blue branding
 custom_css = "public/css/custom-branding.css"
 
-# Spirit Airlines logo and branding
-logo_file_url = "public/images/logo.svg"
-login_page_image = "public/images/logo.svg"
+# Abercrombie & Fitch logo and branding
+logo_file_url = "public/images/main.png"
+login_page_image = "public/images/main.png"
 
 # Enable markdown and HTML rendering
 enable_markdown = true

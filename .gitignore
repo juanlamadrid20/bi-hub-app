@@ -57,3 +57,4 @@ ehthumbs.db
 htmlcov/
 .coverage.*
 .DS_Store
+.playwright

@@ -6,10 +6,10 @@ env:
     value: "F8*9Z/LVfsoHzEt_/IvaI4s1-.1cd/bQ%Bmd5w5$FcXP$ga=taQR_,YE9Q91xnSG"
 
   - name: DATABASE_INSTANCE
-    value: "lakebase-chat-sessions-jl"
+    value: "cx-live-demo-no-delete" 
 
   - name: SERVING_ENDPOINT
-    value: "ka-a05b7a34-endpoint"
+    value: "ka-83d10043-endpoint"
 
   - name: ENABLE_HEADER_AUTH
     value: true

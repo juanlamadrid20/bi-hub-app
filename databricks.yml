@@ -10,24 +10,20 @@ variables:
   
   app_name:
     description: "App name"
-    default: "bi-agent-jl"
+    default: "bi-hub-app"
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "lakebase-chat-sessions-jl"
-
-  model_endpoint_name:
-    description: "Databricks model serving endpoint name"
-    default: "ka-a05b7a34-endpoint"
+    default: "cx-live-demo-no-delete"
   
   # Catalog configuration
   lakebase_database_name:
     description: "Database name for database resources"
     default: "databricks_postgres"
-  
-  synced_catalog_name:
-    description: "Catalog name for database resources"
-    default: "bi_agent_chat_sessions"
+
+  model_endpoint_name:
+    description: "Databricks model serving endpoint name"
+    default: "ka-83d10043-endpoint"
   
   user_name:
     description: "User name for permissions"
@@ -41,6 +37,8 @@ targets:
   dev:
     mode: development
     default: true
+    presets:
+      source_linked_deployment: false
     workspace:
       host: https://e2-demo-field-eng.cloud.databricks.com
     
@@ -52,7 +50,7 @@ targets:
           tasks:
             - task_key: "setup_database"
               notebook_task:
-                notebook_path: "./src/scripts/setup_chainlit_lakebase.ipynb"
+                notebook_path: "./jobs/setup_chainlit_lakebase.ipynb"
               environment_key: "default"
           environments:
             - environment_key: "default"
@@ -75,10 +73,10 @@ targets:
             - level: "CAN_MANAGE"
               user_name: ${var.user_name}
 
-      database_instances:
-        lakebase_postgres:
-          name: ${var.lakebase_instance_name}
-          capacity: "CU_1"
+      # database_instances:
+      #   lakebase_postgres:
+      #     name: ${var.lakebase_instance_name}
+      #     capacity: "CU_1"
       
       apps:
         bi-agent:

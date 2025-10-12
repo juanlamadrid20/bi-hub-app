@@ -10,6 +10,146 @@ This guide documents the complete process to deploy the BI Hub App from a local 
 - Model serving endpoint available (e.g., `mas-0c4ba3bd-endpoint`)
 - Lakebase PostgreSQL instance available (e.g., `cx-live-demo-no-delete`)
 
+## Configuration Setup
+
+Before deploying, you need to replace placeholder values in the configuration files with your actual workspace details.
+
+### Step 1: Configure `databricks.yml`
+
+Edit `databricks.yml` and replace the following placeholder values:
+
+#### 1. Workspace URL (line 43)
+```yaml
+host: <REPLACE_ME_WITH_WORKSPACE_URL>
+```
+
+**How to find it:**
+- Use your Databricks workspace URL from your browser
+- Format: `https://<workspace-name>.cloud.databricks.com`
+- Example: `https://e2-demo-field-eng.cloud.databricks.com`
+
+**Update to:**
+```yaml
+host: https://your-workspace.cloud.databricks.com
+```
+
+#### 2. User Name (line 30)
+```yaml
+default: "<REPLACE_ME_WITH_USER_NAME>"
+```
+
+**How to find it:**
+- Use your Databricks user email
+- This is the email you use to log into Databricks
+
+**Update to:**
+```yaml
+default: "your.email@company.com"
+```
+
+#### 3. Lakebase Instance Name (line 17)
+```yaml
+default: "<REPLACE_ME_WITH_INSTANCE_NAME>"
+```
+
+**How to find it:**
+```bash
+# List all Lakebase instances in your workspace
+databricks lakebase list --profile <PROFILE>
+```
+
+**Update to:**
+```yaml
+default: "your-lakebase-instance-name"
+```
+
+#### 4. Model Endpoint Name (line 26)
+```yaml
+default: "<REPLACE_ME_WITH_ENDPOINT_NAME>"
+```
+
+**How to find it:**
+```bash
+# List all serving endpoints in your workspace
+databricks serving-endpoints list --profile <PROFILE>
+```
+
+Or navigate to: Workspace → Machine Learning → Serving → Model Serving
+
+**Update to:**
+```yaml
+default: "your-endpoint-name"
+```
+
+### Step 2: Configure `src/app/app.yaml`
+
+Edit `src/app/app.yaml` and replace the following placeholder values:
+
+#### 1. Database Instance (line 9)
+```yaml
+value: "<REPLACE_ME_WITH_INSTANCE_NAME>"
+```
+
+**Update to:**
+```yaml
+value: "your-lakebase-instance-name"
+```
+
+**Note:** This should match the `lakebase_instance_name` from `databricks.yml`
+
+#### 2. Serving Endpoint (line 12)
+```yaml
+value: "<REPLACE_ME_WITH_ENDPOINT_NAME>"
+```
+
+**Update to:**
+```yaml
+value: "your-endpoint-name"
+```
+
+**Note:** This should match the `model_endpoint_name` from `databricks.yml`
+
+### Configuration Validation Checklist
+
+Before proceeding with deployment, verify:
+
+- [ ] All `<REPLACE_ME_...>` placeholders have been replaced in both files
+- [ ] The workspace URL is correct and accessible
+- [ ] Your user email matches your Databricks account
+- [ ] The Lakebase instance exists and you have access to it
+- [ ] The model serving endpoint exists and is running
+- [ ] The same instance and endpoint names are used in both `databricks.yml` and `app.yaml`
+
+### Quick Configuration Example
+
+**databricks.yml:**
+```yaml
+variables:
+  lakebase_instance_name:
+    default: "cx-live-demo-no-delete"
+  
+  model_endpoint_name:
+    default: "mas-0c4ba3bd-endpoint"
+  
+  user_name:
+    default: "juan.lamadrid@databricks.com"
+
+targets:
+  dev:
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+```
+
+**src/app/app.yaml:**
+```yaml
+env: 
+  - name: DATABASE_INSTANCE
+    value: "cx-live-demo-no-delete"
+  
+  - name: SERVING_ENDPOINT
+    value: "mas-0c4ba3bd-endpoint"
+```
+
 ## Deployment Process
 
 ### Step 1: Validate Bundle Configuration
@@ -160,6 +300,8 @@ databricks apps get bi-hub-app --profile <PROFILE>
 For a fresh deployment, run these commands in sequence:
 
 ```bash
+# 0. Configure databricks.yml and app.yaml (replace all <REPLACE_ME_...> values first!)
+
 # 1. Validate configuration
 databricks bundle validate --profile <PROFILE>
 

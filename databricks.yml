@@ -14,7 +14,7 @@ variables:
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "cx-live-demo-no-delete"
+    default: "<REPLACE_ME_WITH_INSTANCE_NAME>"
   
   # Catalog configuration
   lakebase_database_name:
@@ -23,11 +23,11 @@ variables:
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "ka-83d10043-endpoint"
+    default: "<REPLACE_ME_WITH_ENDPOINT_NAME>"
   
   user_name:
     description: "User name for permissions"
-    default: "juan.lamadrid@databricks.com"
+    default: "<REPLACE_ME_WITH_USER_NAME>"
 
 sync:
   exclude:
@@ -40,7 +40,7 @@ targets:
     presets:
       source_linked_deployment: false
     workspace:
-      host: https://e2-demo-field-eng.cloud.databricks.com
+      host: <REPLACE_ME_WITH_WORKSPACE_URL>
     
     resources:
       jobs:

@@ -8,13 +8,30 @@ This guide documents the complete process to deploy the BI Hub App from a local 
 - Access to a Databricks workspace with appropriate permissions
 - A configured Databricks profile (e.g., `field-eng-west`)
 - Model serving endpoint available (e.g., `mas-0c4ba3bd-endpoint`)
-- Lakebase PostgreSQL instance available (e.g., `cx-live-demo-no-delete`)
+
+## Step 0: Create Lakebase Instance
+
+Before configuring and deploying the app, you must first create a Lakebase PostgreSQL instance. This is a one-time setup per workspace.
+
+### Run the Lakebase Setup Notebook
+
+1. Navigate to the `lakebase/notebooks/` directory in your workspace
+2. Open and run the `lakebase.ipynb` notebook
+3. The notebook will:
+   - Install required dependencies (`databricks-sdk`)
+   - Initialize a WorkspaceClient
+   - Get or create a Lakebase instance (default name: `cx-live-demo-no-delete`)
+   - Display instance details including DNS endpoints and credentials
+
+**Important:** Note the instance name you create, as you'll need it for the configuration steps below.
+
+**Alternative:** If you already have a Lakebase instance, you can skip this step and use your existing instance name in the configuration.
 
 ## Configuration Setup
 
 Before deploying, you need to replace placeholder values in the configuration files with your actual workspace details.
 
-### Step 1: Configure `databricks.yml`
+### Step 1: Configure `databricks.yml` (After Lakebase Instance Creation)
 
 Edit `databricks.yml` and replace the following placeholder values:
 
@@ -55,7 +72,7 @@ default: "<REPLACE_ME_WITH_INSTANCE_NAME>"
 **How to find it:**
 ```bash
 # List all Lakebase instances in your workspace
-databricks lakebase list --profile <PROFILE>
+databricks database list-database-instances --profile <PROFILE>
 ```
 
 **Update to:**
@@ -81,7 +98,7 @@ Or navigate to: Workspace → Machine Learning → Serving → Model Serving
 default: "your-endpoint-name"
 ```
 
-### Step 2: Configure `src/app/app.yaml`
+### Step 2: Configure `src/app/app.yaml` (After Lakebase Instance Creation)
 
 Edit `src/app/app.yaml` and replace the following placeholder values:
 
@@ -113,10 +130,11 @@ value: "your-endpoint-name"
 
 Before proceeding with deployment, verify:
 
+- [ ] Lakebase instance has been created (Step 0: Run `lakebase/notebooks/lakebase.ipynb`)
 - [ ] All `<REPLACE_ME_...>` placeholders have been replaced in both files
 - [ ] The workspace URL is correct and accessible
 - [ ] Your user email matches your Databricks account
-- [ ] The Lakebase instance exists and you have access to it
+- [ ] The Lakebase instance name matches the one created in Step 0
 - [ ] The model serving endpoint exists and is running
 - [ ] The same instance and endpoint names are used in both `databricks.yml` and `app.yaml`
 
@@ -300,24 +318,27 @@ databricks apps get bi-hub-app --profile <PROFILE>
 For a fresh deployment, run these commands in sequence:
 
 ```bash
-# 0. Configure databricks.yml and app.yaml (replace all <REPLACE_ME_...> values first!)
+# 0. Create Lakebase instance (one-time per workspace)
+#    Run lakebase/notebooks/lakebase.ipynb in your Databricks workspace
 
-# 1. Validate configuration
+# 1. Configure databricks.yml and app.yaml (replace all <REPLACE_ME_...> values first!)
+
+# 2. Validate configuration
 databricks bundle validate --profile <PROFILE>
 
-# 2. Deploy bundle resources and sync code
+# 3. Deploy bundle resources and sync code
 databricks bundle deploy --profile <PROFILE>
 
-# 3. Setup database (one-time per environment)
+# 4. Setup database (one-time per environment)
 databricks bundle run setup_lakebase --profile <PROFILE>
 
-# 4. Start app compute
+# 5. Start app compute
 databricks apps start bi-hub-app --profile <PROFILE>
 
-# 5. Deploy and run the app
+# 6. Deploy and run the app
 databricks bundle run bi-agent --profile <PROFILE>
 
-# 6. Verify deployment
+# 7. Verify deployment
 databricks apps get bi-hub-app --profile <PROFILE>
 ```
 

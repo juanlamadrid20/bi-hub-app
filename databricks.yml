@@ -14,20 +14,20 @@ variables:
 
   lakebase_instance_name:
     description: "Database instance name"
-    default: "<REPLACE_ME_WITH_INSTANCE_NAME>"
+    default: "cx-live-demo-no-delete"
   
   # Catalog configuration
-  lakebase_database_name:
+  lakebase_database_name: 
     description: "Database name for database resources"
     default: "databricks_postgres"
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "<REPLACE_ME_WITH_ENDPOINT_NAME>"
+    default: "mas-286cd1ff-endpoint"
   
   user_name:
     description: "User name for permissions"
-    default: "<REPLACE_ME_WITH_USER_NAME>"
+    default: "juan.lamadrid@databricks.com"
 
 sync:
   exclude:
@@ -96,5 +96,5 @@ targets:
           user_api_scopes: ["serving.serving-endpoints"]
           source_code_path: ./src/app
           permissions:
-            - level: "CAN_USE"
+            - level: "CAN_MANAGE"
               user_name: ${var.user_name}

@@ -55,9 +55,15 @@ It integrates with Agent Bricks (KA) and uses Lakebase (PostgreSQL) for session 
 - **No streaming** → ensure OBO path uses SSE (`Accept: text/event-stream`) and payload key is `input=[...]` (not `messages`)
 - **Local** → set `DATABRICKS_TOKEN` (PAT) and use OpenAI client path
 
-## Requirements (brief)
+## Setup & Requirements
 
+**Prerequisites:**
 - Python 3.8+
 - Databricks CLI ≥ 0.267.0 (Apps)
 - MAS endpoint + Lakebase instance
 - `requirements.txt` in `src/app` (pinned)
+
+**Initial Setup:**
+1. **Create Lakebase Instance**: Run `lakebase/notebooks/lakebase.ipynb` in your Databricks workspace to create the PostgreSQL instance (one-time per workspace)
+2. Configure `databricks.yml` and `src/app/app.yaml` with your instance name and endpoint details
+3. Deploy using the steps in `README.cli-dev.e2e.md`

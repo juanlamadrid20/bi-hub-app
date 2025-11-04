@@ -6,10 +6,10 @@ env:
     value: "F8*9Z/LVfsoHzEt_/IvaI4s1-.1cd/bQ%Bmd5w5$FcXP$ga=taQR_,YE9Q91xnSG"
 
   - name: DATABASE_INSTANCE
-    value: "<REPLACE_ME_WITH_INSTANCE_NAME>" 
+    value: "cx-live-demo-no-delete" 
 
   - name: SERVING_ENDPOINT
-    value: "<REPLACE_ME_WITH_ENDPOINT_NAME>"
+    value: "mas-286cd1ff-endpoint"
 
   - name: ENABLE_HEADER_AUTH
     value: true

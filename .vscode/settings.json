@@ -1,11 +1,11 @@
 {
     "jupyter.interactiveWindow.cellMarker.codeRegex": "^# COMMAND ----------|^# Databricks notebook source|^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
     "jupyter.interactiveWindow.cellMarker.default": "# COMMAND ----------",
-   "workbench.colorCustomizations": {
+    "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#ff8b7a",
     "activityBar.background": "#030303",
-    "activityBar.foreground": "#fcfdfd",
-    "activityBar.inactiveForeground": "#e15e01",
+    "activityBar.foreground": "#fc6a02",
+    "activityBar.inactiveForeground": "#833b07",
     "activityBarBadge.background": "#dfffe3",
     "activityBarBadge.foreground": "#15202b",
     "commandCenter.border": "#15202b99",
@@ -19,6 +19,6 @@
     "titleBar.activeForeground": "#15202b",
     "titleBar.inactiveBackground": "#ff5f4799",
     "titleBar.inactiveForeground": "#15202b99"
-},
+}
     
 }

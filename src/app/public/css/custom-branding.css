@@ -455,3 +455,155 @@ body::before {
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 128, 255, 0.3);
 }
+
+/* ========================================
+   RETAIL INTELLIGENCE HOME PAGE STYLING
+   ======================================== */
+
+/* Quick Action Cards Styling */
+.chainlit-markdown table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 15px;
+  margin: 20px 0;
+}
+
+.chainlit-markdown table td {
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+  border: 2px solid #0080ff;
+  border-radius: 12px;
+  padding: 20px;
+  vertical-align: top;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.chainlit-markdown table td:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 128, 255, 0.2);
+  border-color: #1a73e8;
+}
+
+.chainlit-markdown table td h3 {
+  color: #003366;
+  font-weight: 700;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.chainlit-markdown table td ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.chainlit-markdown table td li {
+  color: #003366;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* Quick Stats Table Styling */
+.chainlit-markdown table td[align="center"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #0080ff;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chainlit-markdown table td[align="center"] strong {
+  color: #003366;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.chainlit-markdown table td[align="center"] strong:first-of-type {
+  font-size: 16px;
+  color: #0080ff;
+  font-weight: 700;
+}
+
+/* Example Questions Styling */
+.chainlit-markdown h3 {
+  color: #003366;
+  font-weight: 700;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  font-size: 20px;
+  border-left: 4px solid #0080ff;
+  padding-left: 15px;
+}
+
+.chainlit-markdown ul {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+.chainlit-markdown ul li {
+  color: #003366;
+  margin: 10px 0;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.chainlit-markdown ul li::marker {
+  color: #0080ff;
+}
+
+/* Data Domain Sections */
+.chainlit-markdown h3 + p {
+  color: #003366;
+  margin: 10px 0 15px 0;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.chainlit-markdown h3 + p + strong {
+  color: #0080ff;
+  font-weight: 600;
+  display: block;
+  margin-top: 10px;
+}
+
+/* Help Section Styling */
+.chainlit-markdown h2 {
+  color: #003366;
+  font-weight: 700;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.chainlit-markdown strong {
+  color: #0080ff;
+  font-weight: 600;
+}
+
+.chainlit-markdown p strong {
+  font-size: 16px;
+  display: block;
+  margin: 15px 0 10px 0;
+}
+
+/* Responsive adjustments for tables */
+@media (max-width: 768px) {
+  .chainlit-markdown table {
+    border-spacing: 10px;
+  }
+  
+  .chainlit-markdown table td {
+    padding: 15px;
+    font-size: 14px;
+  }
+  
+  .chainlit-markdown table td h3 {
+    font-size: 16px;
+  }
+}

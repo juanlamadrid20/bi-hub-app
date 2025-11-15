@@ -47,7 +47,13 @@ class Settings(BaseSettings):
 
     chat_starter_messages: List[Dict[str, str]] = [
         {"label": "Revenue Analytics", "message": "Analyze the overall revenue by Segments in 2024"}, 
-        {"label": "Route Performance", "message": "Analyze the performance of FLL to LAS in 2024"}
+        {"label": "Route Performance", "message": "Analyze the performance of FLL to LAS in 2024"},
+        {"label": "Customer Segments", "message": "What are the key customer segments and their lifetime values?"},
+        {"label": "Inventory Health", "message": "Which products are at risk of stockout or overstock?"},
+        {"label": "Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"},
+        {"label": "Product Performance", "message": "What are the top performing product categories this month?"},
+        {"label": "Channel Analysis", "message": "Compare sales performance across different channels"},
+        {"label": "Stockout Analysis", "message": "Show me products with recent stockout events and revenue impact"}
     ]
 
     # Local Only

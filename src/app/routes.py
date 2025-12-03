@@ -117,9 +117,15 @@ async def on_message(message: cl.Message):
                 await renderer.on_tool_call(event["name"], event["args"])
             elif event["type"] == "tool.output":
                 await renderer.on_tool_output(event["name"], event["output"])
+        
+        # Ensure all steps are properly closed on successful completion
+        await renderer.complete()
+        
     except Exception as e:
         logger.error(f"Error: {e}")
-        await cl.Message(content=str(e)).send()
+        # Close steps with error state and show error message
+        await renderer.error(str(e))
+        await cl.Message(content=f"❌ An error occurred: {str(e)}").send()
 
 
 @cl.on_chat_resume

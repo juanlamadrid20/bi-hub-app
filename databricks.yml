@@ -23,7 +23,7 @@ variables:
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "mas-286cd1ff-endpoint"
+    default: "mas-d8f57d8b-endpoint"
   
   user_name:
     description: "User name for permissions"

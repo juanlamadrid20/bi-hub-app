@@ -1,44 +1,112 @@
 # services/renderers.py
 import chainlit as cl
-from typing import Optional
+from typing import Optional, Dict
 from services.table_parser import extract_first_table
 
-class ChainlitStream:
-    """Single in-flight message for assistant text, plus small cards for tool status."""
-    def __init__(self):
-        self.status_msg: Optional[cl.Message] = None
-        self.text_msg: Optional[cl.Message] = None
-        self._status_lines: list[str] = []
 
-    async def start(self, title: str = "**Analyzing your query…**"):
-        self.status_msg = cl.Message(content=f"**{title}**\n\n_Status:_ initializing...")
-        await self.status_msg.send()
+class ChainlitStream:
+    """
+    Renders assistant responses with visual activity indicators.
+    
+    Uses Chainlit's Step API to show spinners during processing,
+    with nested steps for tool executions.
+    """
+    
+    def __init__(self):
+        self.root_step: Optional[cl.Step] = None
+        self.text_msg: Optional[cl.Message] = None
+        self._tool_steps: Dict[str, cl.Step] = {}
+        self._active_tool: Optional[str] = None
+
+    async def start(self):
+        """
+        Start the processing indicator with a spinner.
+        Creates a Step that shows visual activity to the user.
+        """
+        self.root_step = cl.Step(
+            name="Processing",
+            type="run",
+            show_input=False
+        )
+        await self.root_step.__aenter__()
+        self.root_step.output = "🔄 Analyzing your query..."
+        await self.root_step.update()
 
     async def on_tool_call(self, name: str, args: str):
-        self._status_lines.append(f"🛠️ **{name or 'tool'}** started")
-        await self._update_status()
+        """
+        Show a nested step with spinner when a tool starts executing.
+        """
+        tool_name = name or "tool"
+        
+        # Update root step to show tool is being called
+        if self.root_step:
+            self.root_step.output = f"🛠️ Executing **{tool_name}**..."
+            await self.root_step.update()
+        
+        # Create nested step for the tool with its own spinner
+        tool_step = cl.Step(
+            name=tool_name,
+            type="tool",
+            show_input=True
+        )
+        await tool_step.__aenter__()
+        
+        # Show truncated args if available
+        if args:
+            truncated_args = args[:500] + "..." if len(args) > 500 else args
+            tool_step.input = truncated_args
+        
+        tool_step.output = "Running..."
+        await tool_step.update()
+        
+        self._tool_steps[tool_name] = tool_step
+        self._active_tool = tool_name
 
     async def on_tool_output(self, name: str, out: str):
-        self._status_lines.append(f"✅ **{name or 'tool'}** completed")
-        await self._update_status()
-
-    async def _update_status(self):
-        if not self.status_msg:
-            self.status_msg = cl.Message(content="")
-            await self.status_msg.send()
-        body = ["**Run status**:"]
-        body.extend(f"- {line}" for line in self._status_lines)
-        self.status_msg.content = "\n".join(body)
-        await self.status_msg.update()
+        """
+        Complete the tool step and show output.
+        """
+        tool_name = name or "tool"
+        
+        if tool_name in self._tool_steps:
+            tool_step = self._tool_steps[tool_name]
+            # Show truncated output
+            if out:
+                truncated_out = out[:800] + "..." if len(out) > 800 else out
+                tool_step.output = f"✅ Completed\n\n```\n{truncated_out}\n```"
+            else:
+                tool_step.output = "✅ Completed"
+            await tool_step.update()
+            # Exit the step context to show completion
+            await tool_step.__aexit__(None, None, None)
+            del self._tool_steps[tool_name]
+        
+        # Update root step
+        if self.root_step:
+            self.root_step.output = "🔄 Processing response..."
+            await self.root_step.update()
+        
+        self._active_tool = None
 
     async def on_text_delta(self, token: str):
+        """
+        Stream text tokens to the response message.
+        """
         if self.text_msg is None:
-            # Create AFTER status so this sits below it in the chat.
+            # Close the root step spinner before showing response
+            await self._complete_processing()
+            # Create message for streaming response
             self.text_msg = cl.Message(content="")
             await self.text_msg.send()
         await self.text_msg.stream_token(token or "")
 
     async def on_text_done(self, text: str):
+        """
+        Finalize the response message with optional table extraction.
+        """
+        # Ensure processing step is closed
+        await self._complete_processing()
+        
         if self.text_msg is None:
             self.text_msg = cl.Message(content=text or "")
             await self.text_msg.send()
@@ -62,37 +130,43 @@ class ChainlitStream:
 
         await self.text_msg.update()
 
-    # async def on_text_delta(self, token: str):
-    #     if self.msg is None:
-    #         await self.start()
-    #     await self.msg.stream_token(token or "")
+    async def _complete_processing(self):
+        """
+        Complete the root processing step, removing the spinner.
+        """
+        if self.root_step:
+            self.root_step.output = "✅ Analysis complete"
+            await self.root_step.update()
+            await self.root_step.__aexit__(None, None, None)
+            self.root_step = None
+        
+        # Clean up any remaining tool steps
+        for tool_name, tool_step in list(self._tool_steps.items()):
+            tool_step.output = "✅ Completed"
+            await tool_step.update()
+            await tool_step.__aexit__(None, None, None)
+        self._tool_steps.clear()
 
-    # async def on_text_done(self, text: str):
-    #     if self.msg is None:
-    #         await self.start()
+    async def complete(self):
+        """
+        Public method to ensure all steps are properly closed.
+        Call this when processing is done or on error.
+        """
+        await self._complete_processing()
 
-    #     text = (text or "").strip()
-    #     df, remainder = extract_first_table(text)
-
-    #     if df is not None:
-    #         # Show narrative text (if any) and attach the table as an element
-    #         self.msg.content = remainder or " "
-    #         try:
-    #             self.msg.elements = [cl.Dataframe(df=df, name="Results")]
-    #         except Exception:
-    #             # fallback: leave as text if element not available
-    #             self.msg.content = text
-    #     else:
-    #         self.msg.content = text or self.msg.content
-
-    #     await self.msg.update()
-
-    # async def on_tool_call(self, name: str, args: str):
-    #     await cl.Message(
-    #         content=f"🛠️ Handing off to **{name or 'tool'}**…\n\n```json\n{(args or '')[:600]}\n```"
-    #     ).send()
-
-    # async def on_tool_output(self, name: str, out: str):
-    #     await cl.Message(
-    #         content=f"✅ **{name or 'tool'}** completed.\n\n```\n{(out or '')[:1000]}\n```"
-    #     ).send()
+    async def error(self, error_msg: str):
+        """
+        Handle error state - close steps and show error.
+        """
+        if self.root_step:
+            self.root_step.output = f"❌ Error: {error_msg}"
+            await self.root_step.update()
+            await self.root_step.__aexit__(None, None, None)
+            self.root_step = None
+        
+        # Clean up tool steps on error
+        for tool_name, tool_step in list(self._tool_steps.items()):
+            tool_step.output = "❌ Interrupted"
+            await tool_step.update()
+            await tool_step.__aexit__(None, None, None)
+        self._tool_steps.clear()

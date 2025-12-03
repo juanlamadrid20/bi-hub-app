@@ -9,7 +9,7 @@ env:
     value: "cx-live-demo-no-delete" 
 
   - name: SERVING_ENDPOINT
-    value: "mas-286cd1ff-endpoint"
+    value: "mas-d8f57d8b-endpoint"
 
   - name: ENABLE_HEADER_AUTH
     value: true

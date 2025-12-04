@@ -1,6 +1,6 @@
 [project]
-# Enable HTML rendering for rich content
-enable_html = true
+# Whether to enable telemetry (default: true)
+enable_telemetry = false
 
 # List of environment variables to be provided by each user to use the app
 user_env = []
@@ -8,81 +8,77 @@ user_env = []
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
 
-# Duration (in seconds) of the user session expiry (7 days for BI agent)
-user_session_timeout = 604800
-
-# Enable third parties caching (e.g., LangChain cache)
+# Enable third parties caching (e.g. LangChain cache)
 cache = false
-
-# Whether to persist user environment variables (API keys) to the database
-persist_user_env = false
-
-# Whether to mask user environment variables (API keys) in the UI
-mask_user_env = false
 
 # Authorized origins
 allow_origins = ["*"]
 
+# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
+# follow_symlink = false
+
 [features]
-# Process and display HTML in messages (disabled for security)
-unsafe_allow_html = false
+# Automatically tag threads with the current chat profile (if chat profiles are configured)
+# auto_tag_thread = true
 
-# Process and display mathematical expressions
-latex = false
+# Process and display HTML in messages
+unsafe_allow_html = true
 
-# Autoscroll new user messages at the top of the window
-user_message_autoscroll = true
+# Process and display mathematical expressions in LaTeX format
+latex = true
 
-# Automatically tag threads with the current chat profile
-auto_tag_thread = true
+# Automatically convert Python's stdout to messages
+# spontaneous_file_upload = {enabled = true, accept = ["*/*"], max_files = 20, max_size_mb = 500}
 
 # Allow users to edit their own messages
-edit_message = true
+# edit_message = true
 
-# Enable chat history persistence (required for sidebar)
-persist_chat_history = true
-
-# Enable thread management (required for sidebar)
-enable_thread_management = true
-
-# File upload for data analysis (restricted to common data formats)
-[features.spontaneous_file_upload]
-    enabled = true
-    # Accept common data file formats for BI analysis
-    accept = [
-        "text/csv",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/json",
-        "text/plain"
-    ]
-    max_files = 5
-    max_size_mb = 50
+[features.speech_to_text]
+    enabled = false
 
 [UI]
-# Name of the assistant
-name = "AI Agent"
+# Name of the app
+name = "BI Hub"
 
-# Sidebar configuration
-default_sidebar_state = "open"
-show_sidebar = true
+# Show the readme while the thread is empty
+show_readme_as_default = false
 
-# Chain of Thought display mode
-cot = "full"
+# Description of the app (shows in the UI)
+description = "Your AI-powered Business Intelligence Assistant"
 
-# Custom Abercrombie & Fitch blue branding
-custom_css = "public/css/custom-branding.css"
+# Large size content are by default collapsed for a cleaner UI
+default_collapse_content = true
 
-# Abercrombie & Fitch logo and branding
-logo_file_url = "public/images/main.png"
-login_page_image = "public/images/main.png"
+# Hide the chain of thought details from the user in the UI
+hide_cot = false
 
-# Enable markdown and HTML rendering
-enable_markdown = true
-enable_html = true
+# Logo and favicon paths (using standard Chainlit naming in public root)
+logo_dark = "/public/logo_dark.png"
+logo_light = "/public/logo_light.png"
+favicon = "/public/logo.png"
 
-# Alert style
-alert_style = "classic"
+# Custom CSS file path (relative to the root of the project)
+custom_css = "/public/css/custom-branding.css"
+
+# Custom JS file path (relative to the root of the project)
+custom_js = "/public/js/loading-overlay.js"
+
+# Custom font path or URL (will be used for the entire app)
+# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+
+# Override default MUI light theme (see https://docs.chainlit.io/customisation/theme)
+[UI.theme]
+    default = "light"
+    layout = "default"
+    font_family = "Inter, sans-serif"
+
+[UI.theme.light]
+    background = "#ffffff"
+    paper = "#f8f9fa"
+
+[UI.theme.dark]
+    background = "#0d1f3c"
+    paper = "#1a2d4a"
 
 [meta]
-generated_by = "2.7.2"
+generated_by = "1.3.0"

@@ -46,14 +46,20 @@ class Settings(BaseSettings):
     history_max_chars: int = 120000
 
     chat_starter_messages: List[Dict[str, str]] = [
-        {"label": "Revenue Analytics", "message": "Analyze the overall revenue by Segments in 2024"}, 
-        {"label": "Route Performance", "message": "Analyze the performance of FLL to LAS in 2024"},
-        {"label": "Customer Segments", "message": "What are the key customer segments and their lifetime values?"},
-        {"label": "Inventory Health", "message": "Which products are at risk of stockout or overstock?"},
-        {"label": "Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"},
-        {"label": "Product Performance", "message": "What are the top performing product categories this month?"},
-        {"label": "Channel Analysis", "message": "Compare sales performance across different channels"},
-        {"label": "Stockout Analysis", "message": "Show me products with recent stockout events and revenue impact"}
+        {"label": "Customer Behavior: Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"}, 
+        {"label": "Voice of the Customer: General Sentiment", "message": "What are customers saying about our products?"}, 
+        {"label": "Big Picture: Top Selling Stockout Risks", "message": "Which of our top-selling product categories have stockout risk, and which customer segments are most affected?"}, 
+        {"label": "Inventory Operations: Product Prioritization", "message": "What products need immediate reordering across our flagship stores? Prioritize by lost sales impact?"}, 
+        
+
+        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
+        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
+        # {"label": "Customer Segments", "message": "What are the key customer segments and their lifetime values?"},
+        # {"label": "Inventory Health", "message": "Which products are at risk of stockout or overstock?"},
+        # {"label": "Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"},
+        # {"label": "Product Performance", "message": "What are the top performing product categories this month?"},
+        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
+        # {"label": "InventoryStockout Analysis", "message": "Show me products with recent stockout events and revenue impact"},
     ]
 
     # Local Only

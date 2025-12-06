@@ -85,9 +85,9 @@ pip install -r requirements.txt
 cd ../client
 npm install
 
-# 4. Run both (in separate terminals)
-# Terminal 1 - Backend
-cd server && uvicorn app:app --reload --port 8010
+# 4. Run both (in separate terminals, from project root)
+# Terminal 1 - Backend (MUST run from project root, not server/)
+uvicorn server.app:app --reload --port 8010
 
 # Terminal 2 - Frontend
 cd client && npm run dev
@@ -145,6 +145,19 @@ npm test
 
 ## Deployment to Databricks
 
+### Prerequisites
+
+1. Set your Databricks profile (if you have multiple):
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
+```
+
+2. Verify authentication:
+```bash
+databricks auth profiles
+databricks current-user me
+```
+
 ### Build the Frontend
 
 ```bash
@@ -155,30 +168,62 @@ This runs `npm run build` and outputs to `client/build/`.
 
 ### Deploy to Databricks Apps
 
-#### Option 1: Using deploy.sh
+**Important:** The Databricks Apps deployment process requires uploading the built frontend separately.
+
+#### Step 1: Build the Frontend
 
 ```bash
-./deploy.sh bi-hub-app
+./build.sh
 ```
 
-#### Option 2: Manual Deployment
+#### Step 2: Upload Frontend Build to Workspace
 
 ```bash
-# 1. Build frontend
-cd client && npm run build && cd ..
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
 
-# 2. Create app (first time only)
+# Upload the built frontend to workspace
+databricks workspace import-dir client/build \
+  "/Workspace/Users/$(databricks current-user me --output json | jq -r .userName)/apps/bi-hub-app/files/client/build" \
+  --overwrite
+```
+
+#### Step 3: Deploy the App
+
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
+
+# Get your username
+USER_EMAIL=$(databricks current-user me --output json | jq -r .userName)
+
+# Deploy the app with the correct source path
+databricks apps deploy bi-hub-app \
+  --source-code-path "/Workspace/Users/$USER_EMAIL/apps/bi-hub-app/files"
+```
+
+#### Quick Deploy Script
+
+You can also use this one-liner after building:
+
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name && \
+./build.sh && \
+USER_EMAIL=$(databricks current-user me --output json | jq -r .userName) && \
+databricks workspace import-dir client/build \
+  "/Workspace/Users/$USER_EMAIL/apps/bi-hub-app/files/client/build" --overwrite && \
+databricks apps deploy bi-hub-app \
+  --source-code-path "/Workspace/Users/$USER_EMAIL/apps/bi-hub-app/files"
+```
+
+#### First Time App Creation
+
+If the app doesn't exist yet:
+
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
 databricks apps create bi-hub-app
-
-# 3. Sync files
-databricks sync . /Workspace/Users/$USER/apps/bi-hub-app \
-  --exclude node_modules \
-  --exclude .git \
-  --exclude __pycache__
-
-# 4. Deploy
-databricks apps deploy bi-hub-app
 ```
+
+Then follow the deployment steps above.
 
 ### Production Architecture
 
@@ -276,6 +321,47 @@ DATABASE_INSTANCE=cx-live-demo-no-delete
 
 ### Common Issues
 
+#### "Frontend not built" error in deployed app
+
+**Symptom**: When accessing the app URL, you see:
+```json
+{"message":"BI Hub API","docs":"/api/docs","note":"Frontend not built. Run 'npm run build' in client/"}
+```
+
+**Cause**: The `client/build/` directory was not uploaded to the Databricks workspace before deployment.
+
+**Fix**:
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
+
+# 1. Build frontend locally
+./build.sh
+
+# 2. Upload the build to workspace
+USER_EMAIL=$(databricks current-user me --output json | jq -r .userName)
+databricks workspace import-dir client/build \
+  "/Workspace/Users/$USER_EMAIL/apps/bi-hub-app/files/client/build" --overwrite
+
+# 3. Redeploy the app
+databricks apps deploy bi-hub-app \
+  --source-code-path "/Workspace/Users/$USER_EMAIL/apps/bi-hub-app/files"
+```
+
+#### Multiple profiles matched error
+
+**Symptom**:
+```
+Error: resolve: multiple profiles matched: DEFAULT, field-eng-west
+```
+
+**Cause**: Multiple Databricks profiles configured for the same workspace.
+
+**Fix**: Set the `DATABRICKS_CONFIG_PROFILE` environment variable:
+```bash
+export DATABRICKS_CONFIG_PROFILE=your-profile-name
+databricks apps deploy bi-hub-app
+```
+
 #### "Missing bearer token" error
 
 **Cause**: No PAT configured for local development.
@@ -292,7 +378,7 @@ ENABLE_PASSWORD_AUTH=true
 **Cause**: Backend not running or wrong port.
 
 **Fix**:
-1. Ensure FastAPI is running: `uvicorn app:app --port 8010`
+1. Ensure FastAPI is running from project root: `uvicorn server.app:app --port 8010`
 2. Check `vite.config.ts` proxy target matches backend port
 
 #### CORS errors in browser
@@ -325,7 +411,8 @@ Enable verbose logging:
 
 ```bash
 # Backend
-LOG_LEVEL=DEBUG uvicorn app:app --reload --port 8010
+# Run from project root
+LOG_LEVEL=DEBUG uvicorn server.app:app --reload --port 8010
 
 # Check SSE events in browser DevTools → Network → EventStream
 ```

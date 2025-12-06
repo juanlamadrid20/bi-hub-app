@@ -10,7 +10,6 @@ import type {
   StartersResponse,
   SSEEvent,
   Conversation,
-  Message,
 } from '../types/chat';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -18,11 +17,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 // ==================== Error Handling ====================
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string
-  ) {
+  status: number;
+
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
     this.name = 'ApiError';
   }
 }

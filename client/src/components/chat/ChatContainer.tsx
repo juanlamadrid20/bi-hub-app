@@ -16,7 +16,7 @@ import { chatApi } from '../../services/chatApi';
 import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
 import { ConversationSidebar } from './ConversationSidebar';
-import type { StarterMessage, Message } from '../../types/chat';
+import type { StarterMessage } from '../../types/chat';
 
 interface ChatContainerProps {
   className?: string;

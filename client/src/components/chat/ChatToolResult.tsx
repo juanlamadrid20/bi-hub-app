@@ -35,7 +35,7 @@ export function ChatToolResult({ result }: ChatToolResultProps) {
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-3 py-2 flex items-center justify-between text-left"
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:opacity-80 transition-opacity"
       >
         <div className="flex items-center space-x-2">
           {result.is_error ? (
@@ -77,15 +77,15 @@ export function ChatToolResult({ result }: ChatToolResultProps) {
       </button>
 
       {isExpanded && (
-        <div className="px-3 pb-3">
-          <pre className="bg-white dark:bg-slate-800 rounded p-2 overflow-x-auto text-gray-700 dark:text-slate-300">
+        <div className="px-4 pb-4">
+          <pre className="bg-white dark:bg-slate-800 rounded p-3 overflow-x-auto text-gray-700 dark:text-slate-300 leading-relaxed">
             {resultStr}
           </pre>
         </div>
       )}
 
       {!isExpanded && resultStr.length > 200 && (
-        <div className="px-3 pb-2 text-gray-500 dark:text-slate-400 truncate">
+        <div className="px-4 pb-3 text-gray-500 dark:text-slate-400 truncate">
           {preview}
         </div>
       )}

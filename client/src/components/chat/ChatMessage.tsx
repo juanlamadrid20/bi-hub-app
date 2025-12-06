@@ -25,7 +25,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`
-          max-w-[85%] rounded-2xl px-4 py-3
+          max-w-[85%] rounded-2xl px-6 py-5
           ${
             isUser
               ? 'bg-blue-600 text-white'
@@ -35,7 +35,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
       >
         {/* Tool calls */}
         {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mb-3 space-y-2">
+          <div className="mb-5 space-y-3">
             {message.toolCalls.map((toolCall) => (
               <div
                 key={toolCall.id}
@@ -55,7 +55,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
 
         {/* Tool results */}
         {message.toolResults && message.toolResults.length > 0 && (
-          <div className="mb-3 space-y-2">
+          <div className="mb-5 space-y-3">
             {message.toolResults.map((result) => (
               <ChatToolResult key={result.tool_call_id} result={result} />
             ))}
@@ -66,28 +66,81 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
         {message.content && (
           <div
             className={`
-              prose prose-sm max-w-none
+              prose prose-base max-w-none
               ${isUser ? 'prose-invert' : 'dark:prose-invert'}
             `}
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Custom table styling
+                // Headings with better spacing
+                h1: ({ children }) => (
+                  <h1 className="text-2xl font-bold mt-8 mb-4 first:mt-0 leading-tight">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-xl font-bold mt-7 mb-3 first:mt-0 leading-tight">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-lg font-semibold mt-6 mb-2.5 first:mt-0 leading-tight">
+                    {children}
+                  </h3>
+                ),
+                h4: ({ children }) => (
+                  <h4 className="text-base font-semibold mt-5 mb-2 first:mt-0 leading-tight">
+                    {children}
+                  </h4>
+                ),
+                // Paragraphs with better spacing
+                p: ({ children }) => (
+                  <p className="mb-4 leading-relaxed last:mb-0">
+                    {children}
+                  </p>
+                ),
+                // Lists with better spacing
+                ul: ({ children }) => (
+                  <ul className="mb-4 ml-6 space-y-2 list-disc last:mb-0">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="mb-4 ml-6 space-y-2 list-decimal last:mb-0">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="leading-relaxed">
+                    {children}
+                  </li>
+                ),
+                // Blockquotes
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-gray-300 dark:border-slate-600 pl-4 my-5 italic text-gray-700 dark:text-slate-300">
+                    {children}
+                  </blockquote>
+                ),
+                // Horizontal rules
+                hr: () => (
+                  <hr className="my-6 border-gray-300 dark:border-slate-600" />
+                ),
+                // Custom table styling with better spacing
                 table: ({ children }) => (
-                  <div className="overflow-x-auto my-2">
+                  <div className="overflow-x-auto my-5">
                     <table className="min-w-full border-collapse text-sm">
                       {children}
                     </table>
                   </div>
                 ),
                 th: ({ children }) => (
-                  <th className="border border-gray-300 dark:border-slate-600 px-3 py-2 bg-gray-100 dark:bg-slate-700 text-left font-semibold">
+                  <th className="border border-gray-300 dark:border-slate-600 px-4 py-3 bg-gray-100 dark:bg-slate-700 text-left font-semibold">
                     {children}
                   </th>
                 ),
                 td: ({ children }) => (
-                  <td className="border border-gray-300 dark:border-slate-600 px-3 py-2">
+                  <td className="border border-gray-300 dark:border-slate-600 px-4 py-2.5">
                     {children}
                   </td>
                 ),
@@ -96,7 +149,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
                   const isInline = !className;
                   return isInline ? (
                     <code
-                      className="bg-gray-200 dark:bg-slate-600 px-1.5 py-0.5 rounded text-sm"
+                      className="bg-gray-200 dark:bg-slate-600 px-1.5 py-0.5 rounded text-sm font-mono"
                       {...props}
                     >
                       {children}
@@ -108,9 +161,20 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
                   );
                 },
                 pre: ({ children }) => (
-                  <pre className="bg-gray-900 dark:bg-slate-950 rounded-lg p-4 overflow-x-auto text-sm">
+                  <pre className="bg-gray-900 dark:bg-slate-950 rounded-lg p-4 my-5 overflow-x-auto text-sm leading-relaxed">
                     {children}
                   </pre>
+                ),
+                // Strong and emphasis
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-gray-900 dark:text-slate-100">
+                    {children}
+                  </strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic">
+                    {children}
+                  </em>
                 ),
               }}
             >

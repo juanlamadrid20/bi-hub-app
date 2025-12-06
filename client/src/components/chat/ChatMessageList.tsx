@@ -25,9 +25,9 @@ export function ChatMessageList({ messages, streamingMessage }: ChatMessageListP
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-y-auto p-4 space-y-4"
+      className="flex-1 overflow-y-auto p-4 space-y-6"
     >
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-6">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}

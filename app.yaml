@@ -1,0 +1,20 @@
+# BI Hub App - Databricks Apps Configuration
+# React frontend + FastAPI backend
+
+command: ['gunicorn', 'server.app:app', '-w', '2', '-k', 'uvicorn.workers.UvicornWorker', '--bind', '0.0.0.0:8000']
+
+env:
+  # Database Configuration
+  - name: DATABASE_INSTANCE
+    value: "cx-live-demo-no-delete"
+
+  # Serving Endpoint
+  - name: SERVING_ENDPOINT
+    value: "mas-d8f57d8b-endpoint"
+
+  # Authentication Mode
+  - name: ENABLE_HEADER_AUTH
+    value: "true"
+
+  - name: ENABLE_PASSWORD_AUTH
+    value: "false"

@@ -46,20 +46,35 @@ class Settings(BaseSettings):
     history_max_chars: int = 120000
 
     chat_starter_messages: List[Dict[str, str]] = [
-        {"label": "Customer Behavior: Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"}, 
-        {"label": "Voice of the Customer: General Sentiment", "message": "What are customers saying about our products?"}, 
-        {"label": "Big Picture: Top Selling Stockout Risks", "message": "Which of our top-selling product categories have stockout risk, and which customer segments are most affected?"}, 
-        {"label": "Inventory Operations: Product Prioritization", "message": "What products need immediate reordering across our flagship stores? Prioritize by lost sales impact?"}, 
-        
+        # --- Customer Behavior (Single-Domain) ---
+        {"label": "Customer Behavior: VIP Analysis", "message": "How many VIP customers do we have and what is their average lifetime value compared to other segments?"},
+        {"label": "Customer Behavior: Cart Abandonment", "message": "What is our cart abandonment rate and how much potential revenue are we leaving on the table?"},
+        # {"label": "Customer Behavior: Churn Risk", "message": "Which customers are at risk of churning, and what can we do to retain them?"},
+        # {"label": "Customer Behavior: Funnel Analysis", "message": "Where are customers dropping off in our purchase funnel?"},
 
-        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
-        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
-        # {"label": "Customer Segments", "message": "What are the key customer segments and their lifetime values?"},
-        # {"label": "Inventory Health", "message": "Which products are at risk of stockout or overstock?"},
-        # {"label": "Cart Abandonment", "message": "What is the cart abandonment rate and recovery effectiveness?"},
-        # {"label": "Product Performance", "message": "What are the top performing product categories this month?"},
-        # {"label": "Customer Behavior:Channel Analysis", "message": "Compare sales performance across different channels"},
-        # {"label": "InventoryStockout Analysis", "message": "Show me products with recent stockout events and revenue impact"},
+        # --- Inventory Operations (Single-Domain) ---
+        {"label": "Inventory Operations: Health Overview", "message": "What is our current inventory health status across all locations, and how much revenue are we losing to stockouts?"},
+        {"label": "Inventory Operations: Reorder Priority", "message": "What products need immediate reordering across our flagship stores? Prioritize by lost sales impact."},
+        # {"label": "Inventory Operations: Regional Investment", "message": "Compare inventory value and lost sales by region. Where should we prioritize inventory investment?"},
+
+        # --- Voice of Customer (Single-Domain) ---
+        # {"label": "Voice of Customer: Sentiment Themes", "message": "What are customers saying about our products? Show me the key themes from recent reviews."},
+        {"label": "Voice of Customer: Return Patterns", "message": "What patterns do we see in return feedback? Which issues should we escalate to product teams?"},
+        {"label": "Voice of Customer: Brand Love", "message": "What do customers love most about our brand? What themes emerge from 5-star reviews?"},
+        # {"label": "Voice of Customer: Quality Alerts", "message": "Are there any emerging quality issues in recent customer feedback we should address?"},
+
+        # --- Cross-Domain (Multi-Agent Coordination) ---
+        # {"label": "Cross-Domain: VIP Stockout Impact", "message": "Are we losing VIP customers because products they want are out of stock? Show me the intersection of high-value customer demand and inventory gaps."},
+        {"label": "Cross-Domain: Stockout Segments", "message": "Which of our top-selling product categories have stockout risk, and which customer segments are most affected?"},
+        # {"label": "Cross-Domain: Affinity & Availability", "message": "For products with high customer affinity scores, what is the current inventory availability? Are we missing personalization opportunities due to stockouts?"},
+        {"label": "Cross-Domain: Channel Migration", "message": "How do our customers migrate between channels, and does our inventory allocation match their channel preferences?"},
+        {"label": "Cross-Domain: Seasonal Trends", "message": "What product categories are trending with our Loyal customers, and do we have adequate inventory coverage for the upcoming season?"},
+        # {"label": "Strategic: Quarterly Actions", "message": "Give me a strategic summary: What are the top 3 actions we should take this quarter to maximize revenue by better aligning customer demand with inventory?"},
+
+        # --- Triple-Agent (Reviews + Behavior + Inventory) ---
+        # {"label": "Triple-Agent: Stockout Sentiment", "message": "For products with frequent stockouts, what are customers saying in their reviews? Are we losing brand goodwill due to availability issues?"},
+        # {"label": "Triple-Agent: VIP Complaints", "message": "What do our VIP customers complain about most? Are these issues affecting their retention?"},
+        {"label": "Triple-Agent: Quality & Retention", "message": "Combine customer sentiment, purchase behavior, and inventory data: What are the top 3 product quality issues affecting VIP customer retention, and do we have inventory coverage for better alternatives?"},
     ]
 
     # Local Only

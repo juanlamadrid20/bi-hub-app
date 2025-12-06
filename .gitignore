@@ -57,3 +57,7 @@ htmlcov/
 .coverage.*
 .DS_Store
 .playwright
+
+client/node_modules
+
+server/.venv

@@ -16,6 +16,8 @@ import type {
 
 interface UseChatOptions {
   onError?: (error: Error) => void;
+  onThreadCreated?: (threadId: string) => void;
+  threadId?: string | null;
 }
 
 interface UseChatReturn {
@@ -33,12 +35,14 @@ interface UseChatReturn {
   cancelStream: () => void;
   /** Clear all messages */
   clearMessages: () => void;
+  /** Load messages from a conversation */
+  loadMessages: (messages: Message[]) => void;
   /** Clear error state */
   clearError: () => void;
 }
 
 export function useChat(options: UseChatOptions = {}): UseChatReturn {
-  const { onError } = options;
+  const { onError, onThreadCreated, threadId } = options;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null);
@@ -106,6 +110,11 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
           },
           (event: SSEEvent) => {
             switch (event.type) {
+              case 'thread':
+                // Backend created/identified a conversation thread
+                onThreadCreated?.(event.thread_id);
+                break;
+
               case 'text':
                 accumulatedContent += event.content;
                 setStreamingMessage((prev) =>
@@ -149,7 +158,8 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                 break;
             }
           },
-          abortControllerRef.current.signal
+          abortControllerRef.current.signal,
+          threadId || undefined
         );
 
         // After streaming completes, add assistant message to history
@@ -203,6 +213,15 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
   }, []);
 
   /**
+   * Load messages from a conversation
+   */
+  const loadMessages = useCallback((loadedMessages: Message[]) => {
+    setMessages(loadedMessages);
+    setStreamingMessage(null);
+    setError(null);
+  }, []);
+
+  /**
    * Clear error state
    */
   const clearError = useCallback(() => {
@@ -217,6 +236,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     sendMessage,
     cancelStream,
     clearMessages,
+    loadMessages,
     clearError,
   };
 }

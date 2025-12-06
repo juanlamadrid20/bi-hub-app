@@ -97,3 +97,25 @@ class SSEErrorEvent(BaseModel):
 
 # Union type for all SSE events (for documentation)
 SSEEvent = SSETextEvent | SSEToolStartEvent | SSEToolResultEvent | SSEDoneEvent | SSEErrorEvent
+
+
+# ==================== Conversation Models ====================
+
+
+class Message(BaseModel):
+    """A chat message."""
+
+    id: str = Field(description="Message ID")
+    role: Literal["user", "assistant", "system"] = Field(description="Message role")
+    content: str = Field(description="Message content")
+    timestamp: str = Field(description="ISO timestamp")
+
+
+class Conversation(BaseModel):
+    """A conversation/thread."""
+
+    id: str = Field(description="Conversation ID")
+    title: str = Field(description="Conversation title")
+    messages: List[Message] = Field(default_factory=list, description="Messages in conversation")
+    createdAt: str = Field(description="ISO creation timestamp")
+    updatedAt: str = Field(description="ISO update timestamp")

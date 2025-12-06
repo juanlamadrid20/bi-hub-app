@@ -81,12 +81,18 @@ export interface SSEErrorEvent {
   error: string;
 }
 
+export interface SSEThreadEvent {
+  type: 'thread';
+  thread_id: string;
+}
+
 export type SSEEvent =
   | SSETextEvent
   | SSEToolStartEvent
   | SSEToolResultEvent
   | SSEDoneEvent
-  | SSEErrorEvent;
+  | SSEErrorEvent
+  | SSEThreadEvent;
 
 // ==================== UI State Types ====================
 
@@ -104,4 +110,19 @@ export interface ChatState {
   streamingMessage: StreamingMessage | null;
   isLoading: boolean;
   error: string | null;
+}
+
+// ==================== Conversation Types ====================
+
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationGroup {
+  label: string;
+  conversations: Conversation[];
 }

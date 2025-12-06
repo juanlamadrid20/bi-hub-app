@@ -9,6 +9,8 @@ import type {
   SendMessageRequest,
   StartersResponse,
   SSEEvent,
+  Conversation,
+  Message,
 } from '../types/chat';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -55,13 +57,20 @@ export async function getStarters(): Promise<StartersResponse> {
  * @param request - The message request with optional history
  * @param onEvent - Callback for each SSE event
  * @param signal - Optional AbortSignal to cancel the stream
+ * @param threadId - Optional conversation thread ID
  */
 export async function sendMessageStream(
   request: SendMessageRequest,
   onEvent: (event: SSEEvent) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  threadId?: string
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/chat/message/stream`, {
+  const url = new URL(`${API_BASE_URL}/chat/message/stream`, window.location.origin);
+  if (threadId) {
+    url.searchParams.set('thread_id', threadId);
+  }
+
+  const response = await fetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
@@ -86,27 +95,51 @@ export async function sendMessageStream(
       const { done, value } = await reader.read();
 
       if (done) {
+        // Process any remaining data in buffer
+        if (buffer.trim()) {
+          const events = buffer.split('\n\n');
+          for (const eventBlock of events) {
+            const lines = eventBlock.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6)) as SSEEvent;
+                  onEvent(data);
+                } catch (e) {
+                  console.warn('Failed to parse SSE event:', line, e);
+                }
+              }
+            }
+          }
+        }
         break;
       }
 
       buffer += decoder.decode(value, { stream: true });
 
-      // Process complete SSE messages
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      // SSE events are separated by double newlines (\n\n)
+      // Process complete events (those ending with \n\n)
+      const eventBlocks = buffer.split('\n\n');
+      // Keep the last incomplete block in buffer
+      buffer = eventBlocks.pop() || '';
 
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.slice(6)) as SSEEvent;
-            onEvent(data);
+      for (const eventBlock of eventBlocks) {
+        if (!eventBlock.trim()) continue;
+        
+        const lines = eventBlock.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6)) as SSEEvent;
+              onEvent(data);
 
-            // Stop processing on done or error
-            if (data.type === 'done' || data.type === 'error') {
-              return;
+              // Stop processing on done or error
+              if (data.type === 'done' || data.type === 'error') {
+                return;
+              }
+            } catch (e) {
+              console.warn('Failed to parse SSE event:', line, e);
             }
-          } catch (e) {
-            console.warn('Failed to parse SSE event:', line, e);
           }
         }
       }
@@ -131,12 +164,89 @@ export async function sendMessage(
   return handleResponse(response);
 }
 
+// ==================== Conversation API ====================
+
+/**
+ * List all conversations for the current user
+ */
+export async function listConversations(): Promise<Conversation[]> {
+  const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return handleResponse<Conversation[]>(response);
+}
+
+/**
+ * Get a specific conversation by ID
+ */
+export async function getConversation(conversationId: string): Promise<Conversation> {
+  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return handleResponse<Conversation>(response);
+}
+
+/**
+ * Create a new conversation
+ */
+export async function createConversation(name?: string): Promise<Conversation> {
+  const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+
+  return handleResponse<Conversation>(response);
+}
+
+/**
+ * Update conversation title
+ */
+export async function updateConversation(
+  conversationId: string,
+  title: string
+): Promise<Conversation> {
+  const url = new URL(`${API_BASE_URL}/chat/conversations/${conversationId}`, window.location.origin);
+  url.searchParams.set('title', title);
+  
+  const response = await fetch(url.toString(), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return handleResponse<Conversation>(response);
+}
+
+/**
+ * Delete a conversation
+ */
+export async function deleteConversation(conversationId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new ApiError(response.status, error.detail || `HTTP ${response.status}`);
+  }
+}
+
 // ==================== Export ====================
 
 export const chatApi = {
   getStarters,
   sendMessageStream,
   sendMessage,
+  listConversations,
+  getConversation,
+  createConversation,
+  updateConversation,
+  deleteConversation,
 };
 
 export default chatApi;

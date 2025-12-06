@@ -7,10 +7,12 @@ Supports SSE streaming responses for real-time token delivery.
 
 import json
 import logging
-from typing import AsyncIterator, List, Dict, Any
+from typing import AsyncIterator, List, Dict, Any, Optional
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
 from ..auth import Identity, get_identity
 from ..config import settings
@@ -20,6 +22,9 @@ from ..schemas.chat import (
     StartersResponse,
 )
 from ..services import MASChatClient, normalize
+from ..services.database import get_db
+from ..services.conversation_service import ConversationService
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +136,8 @@ async def get_starters() -> StartersResponse:
 async def send_message_stream(
     request: SendMessageRequest,
     identity: Identity = Depends(get_identity),
+    thread_id: Optional[str] = Query(None, description="Conversation thread ID"),
+    db: Session = Depends(get_db),
 ) -> StreamingResponse:
     """
     Send a message and stream the response via Server-Sent Events (SSE).
@@ -148,7 +155,59 @@ async def send_message_stream(
         # Track tool calls to match with outputs
         tool_calls: dict[str, str] = {}  # Maps call_id -> tool_name
         
+        # Conversation service for saving messages (may be None if db not configured)
+        conversation_service = None
+        user_step_id = None
+        assistant_step_id = None
+        accumulated_content = ""
+        current_thread_id = thread_id  # Use local variable to avoid scoping issues
+        
         try:
+            # Only set up conversation service if database is available
+            if db is not None:
+                try:
+                    # Get or create conversation service
+                    # Use email as identifier (legacy app sets email to user.identifier)
+                    user_identifier = identity.email or identity.display_name or "anonymous"
+                    conversation_service = ConversationService(db, user_identifier)
+                    
+                    # Create or get thread
+                    if not current_thread_id:
+                        current_thread_id = conversation_service.create_thread()
+                    else:
+                        # Verify thread exists and belongs to user
+                        thread = conversation_service.get_thread(current_thread_id)
+                        if not thread:
+                            logger.warning(f"Thread {current_thread_id} not found, creating new one")
+                            current_thread_id = conversation_service.create_thread()
+                    
+                    # Save user message
+                    user_step_id = conversation_service.create_step(
+                        thread_id=current_thread_id,
+                        step_type="user_message",
+                        name="user",
+                        input_text=request.message
+                    )
+                    
+                    # Create assistant step for streaming
+                    assistant_step_id = conversation_service.create_step(
+                        thread_id=current_thread_id,
+                        step_type="assistant_message",
+                        name="assistant",
+                        output_text="",  # Will be updated as we stream
+                    )
+                except Exception as db_err:
+                    logger.warning(f"Database operation failed, continuing without persistence: {db_err}")
+                    conversation_service = None
+            else:
+                logger.info("Database not configured, chat will work but history won't be persisted")
+            
+            # Send thread_id to frontend so it knows which conversation this is
+            if current_thread_id:
+                thread_event = {"type": "thread", "thread_id": current_thread_id}
+                data = json.dumps(thread_event, cls=DateTimeEncoder)
+                yield f"data: {data}\n\n"
+            
             # Build messages with history
             messages = _build_messages_with_history(
                 request.message, request.history or []
@@ -168,9 +227,11 @@ async def send_message_stream(
 
                 elif event_type == "text.delta":
                     # Send text chunk
+                    delta = event.get("delta", "")
+                    accumulated_content += delta
                     sse_event = {
                         "type": "text",
-                        "content": event.get("delta", ""),
+                        "content": delta,
                     }
                     data = json.dumps(sse_event, cls=DateTimeEncoder)
                     yield f"data: {data}\n\n"
@@ -238,6 +299,20 @@ async def send_message_stream(
                     data = json.dumps(sse_event, cls=DateTimeEncoder)
                     yield f"data: {data}\n\n"
 
+            # Update assistant step with final content
+            if assistant_step_id and conversation_service:
+                conversation_service.update_step_output(assistant_step_id, accumulated_content)
+            
+            # Update thread name from first user message if still default
+            if conversation_service and current_thread_id:
+                thread = conversation_service.get_thread(current_thread_id)
+                if thread and (thread["title"] == "New conversation" or not thread["title"]):
+                    # Generate title from first message (truncate to 50 chars)
+                    title = request.message[:50].strip()
+                    if len(request.message) > 50:
+                        title += "..."
+                    conversation_service.update_thread_name(current_thread_id, title)
+
             # Send done event
             done_event = {"type": "done"}
             data = json.dumps(done_event)
@@ -245,6 +320,16 @@ async def send_message_stream(
 
         except Exception as e:
             logger.exception(f"Error in chat stream: {e}")
+            # Mark assistant step as error if it exists
+            if assistant_step_id and conversation_service:
+                try:
+                    conversation_service.db.execute(
+                        text("UPDATE steps SET \"isError\" = true WHERE id = :step_id"),
+                        {"step_id": assistant_step_id}
+                    )
+                    conversation_service.db.commit()
+                except:
+                    pass
             error_event = {"type": "error", "error": str(e)}
             data = json.dumps(error_event)
             yield f"data: {data}\n\n"

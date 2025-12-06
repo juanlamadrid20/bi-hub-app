@@ -7,3 +7,4 @@ export { ChatInput } from './ChatInput';
 export { ChatMessage } from './ChatMessage';
 export { ChatMessageList } from './ChatMessageList';
 export { ChatToolResult } from './ChatToolResult';
+export { ConversationSidebar } from './ConversationSidebar';

@@ -3,16 +3,20 @@
  *
  * Main chat interface wrapper that:
  * - Manages chat state via useChat hook
+ * - Manages conversation history via useConversations hook
+ * - Displays conversation sidebar
  * - Displays starter messages on empty state
  * - Contains message list and input
  */
 
 import { useEffect, useCallback, useState } from 'react';
 import { useChat } from '../../hooks/useChat';
+import { useConversations } from '../../hooks/useConversations';
 import { chatApi } from '../../services/chatApi';
 import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
-import type { StarterMessage } from '../../types/chat';
+import { ConversationSidebar } from './ConversationSidebar';
+import type { StarterMessage, Message } from '../../types/chat';
 
 interface ChatContainerProps {
   className?: string;
@@ -21,6 +25,16 @@ interface ChatContainerProps {
 export function ChatContainer({ className = '' }: ChatContainerProps) {
   const [starters, setStarters] = useState<StarterMessage[]>([]);
   const [startersLoading, setStartersLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const {
+    groupedConversations,
+    activeConversationId,
+    loadConversation,
+    deleteConversation,
+    setActiveConversationId,
+    refreshConversations,
+  } = useConversations();
 
   const {
     messages,
@@ -29,8 +43,54 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
     error,
     sendMessage,
     clearMessages,
+    loadMessages,
     clearError,
-  } = useChat();
+  } = useChat({
+    onError: (err) => {
+      console.error('Chat error:', err);
+    },
+    onThreadCreated: (threadId) => {
+      // Backend created a new thread - update our active conversation ID
+      setActiveConversationId(threadId);
+    },
+    threadId: activeConversationId,
+  });
+
+  // Load conversation messages when active conversation changes
+  useEffect(() => {
+    const loadActiveConversation = async () => {
+      if (activeConversationId) {
+        try {
+          const conversation = await loadConversation(activeConversationId);
+          if (conversation && conversation.messages && conversation.messages.length > 0) {
+            loadMessages(conversation.messages);
+          } else {
+            clearMessages();
+          }
+        } catch (err) {
+          console.error('Failed to load conversation:', err);
+          clearMessages();
+        }
+      } else {
+        clearMessages();
+      }
+    };
+    loadActiveConversation();
+  }, [activeConversationId]); // Remove other deps to avoid infinite loops
+
+  // Refresh conversation list when messages change to pick up new conversations
+  // created by the backend or updated titles
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Small delay to let backend finish processing
+      const timeout = setTimeout(() => {
+        refreshConversations().catch(err => {
+          console.error('Failed to refresh conversations:', err);
+        });
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [messages.length]); // Only trigger on message count change
 
   // Fetch starter messages on mount
   useEffect(() => {
@@ -50,12 +110,19 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
 
   /**
    * Handle sending a message
+   * Note: Conversation creation is handled by the backend
    */
   const handleSend = useCallback(
     async (message: string) => {
-      await sendMessage(message);
+      try {
+        await sendMessage(message);
+        // Refresh conversations to pick up any new ones created by backend
+        await refreshConversations();
+      } catch (err) {
+        console.error('Failed to send message:', err);
+      }
     },
-    [sendMessage]
+    [sendMessage, refreshConversations]
   );
 
   /**
@@ -68,41 +135,102 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
     [handleSend]
   );
 
+  /**
+   * Handle creating a new conversation
+   * Just clears the current chat - backend will create conversation on first message
+   */
+  const handleNewConversation = useCallback(() => {
+    clearMessages();
+    setActiveConversationId(null);
+  }, [clearMessages, setActiveConversationId]);
+
+  /**
+   * Handle selecting a conversation
+   */
+  const handleSelectConversation = useCallback(
+    (id: string) => {
+      setActiveConversationId(id);
+      // Messages will be loaded by the useEffect hook
+    },
+    [setActiveConversationId]
+  );
+
+  /**
+   * Handle deleting a conversation
+   */
+  const handleDeleteConversation = useCallback(
+    async (id: string) => {
+      try {
+        await deleteConversation(id);
+        if (activeConversationId === id) {
+          clearMessages();
+        }
+      } catch (err) {
+        console.error('Failed to delete conversation:', err);
+      }
+    },
+    [deleteConversation, activeConversationId, clearMessages]
+  );
+
   const hasMessages = messages.length > 0 || streamingMessage !== null;
 
   return (
-    <div className={`flex flex-col h-full bg-gray-50 dark:bg-slate-900 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <span className="text-white text-lg">🤖</span>
-          </div>
-          <div>
-            <h1 className="font-semibold text-gray-900 dark:text-slate-100">
-              BI Hub Assistant
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-slate-400">
-              Powered by Mosaic AI
-            </p>
-          </div>
-        </div>
+    <div className={`flex h-full bg-gray-50 dark:bg-slate-900 ${className}`}>
+      {/* Sidebar */}
+      <ConversationSidebar
+        groupedConversations={groupedConversations}
+        activeConversationId={activeConversationId}
+        onSelectConversation={handleSelectConversation}
+        onCreateConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-        {/* Actions */}
-        <div className="flex items-center space-x-2">
-          {hasMessages && (
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center space-x-3">
+            {/* Mobile menu button */}
             <button
-              onClick={clearMessages}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              title="New chat"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title="Toggle sidebar"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-          )}
+
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white text-lg">🤖</span>
+            </div>
+            <div>
+              <h1 className="font-semibold text-gray-900 dark:text-slate-100">
+                BI Hub Assistant
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                Powered by Mosaic AI
+              </p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center space-x-2">
+            {hasMessages && (
+              <button
+                onClick={handleNewConversation}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                title="New chat"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Error banner */}
       {error && (
@@ -176,8 +304,9 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
         <ChatMessageList messages={messages} streamingMessage={streamingMessage} />
       )}
 
-      {/* Input */}
-      <ChatInput onSend={handleSend} isLoading={isLoading} disabled={false} />
+        {/* Input */}
+        <ChatInput onSend={handleSend} isLoading={isLoading} disabled={false} />
+      </div>
     </div>
   );
 }

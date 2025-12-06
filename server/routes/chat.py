@@ -145,6 +145,9 @@ async def send_message_stream(
 
     async def event_generator() -> AsyncIterator[str]:
         """Generate SSE events from MAS streaming response."""
+        # Track tool calls to match with outputs
+        tool_calls: dict[str, str] = {}  # Maps call_id -> tool_name
+        
         try:
             # Build messages with history
             messages = _build_messages_with_history(
@@ -178,11 +181,17 @@ async def send_message_stream(
 
                 elif event_type == "tool.call":
                     # Tool call starting
+                    call_id = event.get("item_id", "")
+                    tool_name = event.get("name", "")
+                    # Store tool name for later lookup
+                    tool_calls[call_id] = tool_name
+                    logger.debug(f"Tool call registered: call_id={call_id}, tool_name={tool_name}")
+                    
                     sse_event = {
                         "type": "tool_start",
                         "tool": {
-                            "id": event.get("item_id", ""),
-                            "name": event.get("name", ""),
+                            "id": call_id,
+                            "name": tool_name,
                         },
                         "arguments": event.get("args", ""),
                     }
@@ -191,11 +200,39 @@ async def send_message_stream(
 
                 elif event_type == "tool.output":
                     # Tool result
+                    # event.get("name") contains the call_id which matches the tool call's item_id
+                    call_id = event.get("name", "")
+                    output = event.get("output", "")
+                    tool_name = tool_calls.get(call_id)
+                    
+                    logger.debug(
+                        f"Tool output received: call_id={call_id}, "
+                        f"found_tool_name={tool_name}, "
+                        f"available_keys={list(tool_calls.keys())}"
+                    )
+                    
+                    if not tool_name:
+                        # Fallback: try to extract tool name from output if it contains "Handed off to:"
+                        if isinstance(output, str) and "Handed off to:" in output:
+                            # Extract tool name from "Handed off to: tool-name"
+                            parts = output.split("Handed off to:")
+                            if len(parts) > 1:
+                                tool_name = parts[1].strip()
+                                logger.info(f"Extracted tool name from output: {tool_name} (call_id: {call_id})")
+                        
+                        if not tool_name:
+                            logger.warning(
+                                f"Tool name not found for call_id: {call_id}. "
+                                f"Available tool_calls: {list(tool_calls.keys())}. "
+                                f"Output preview: {str(output)[:100]}"
+                            )
+                            tool_name = "unknown_tool"
+                    
                     sse_event = {
                         "type": "tool_result",
-                        "tool_call_id": event.get("item_id", ""),
-                        "tool_name": event.get("name", ""),
-                        "result": event.get("output", ""),
+                        "tool_call_id": call_id,  # Use call_id to match tool call
+                        "tool_name": tool_name,  # Look up the actual tool name
+                        "result": output,
                         "is_error": False,
                     }
                     data = json.dumps(sse_event, cls=DateTimeEncoder)

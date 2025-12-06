@@ -33,32 +33,67 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
           }
         `}
       >
-        {/* Tool calls */}
-        {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mb-5 space-y-3">
-            {message.toolCalls.map((toolCall) => (
-              <div
-                key={toolCall.id}
-                className="flex items-center space-x-2 text-xs bg-gray-100 dark:bg-slate-700 rounded-lg px-3 py-2"
-              >
-                <svg className="w-4 h-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                <span className="font-medium text-gray-700 dark:text-slate-300">
-                  Running: {toolCall.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Tool calls - only show those that don't have results yet (still running) */}
+        {message.toolCalls && message.toolCalls.length > 0 && (() => {
+          // Filter out tool calls that have completed results
+          const runningToolCalls = message.toolCalls.filter((toolCall) => {
+            if (!message.toolResults || message.toolResults.length === 0) {
+              return true; // No results yet, show as running
+            }
+            // Check if this tool call has a corresponding result
+            // Use string comparison and trim to handle any whitespace issues
+            const hasResult = message.toolResults.some((result) => {
+              const callId = String(toolCall.id || '').trim();
+              const resultCallId = String(result.tool_call_id || '').trim();
+              return callId === resultCallId && callId !== '';
+            });
+            return !hasResult; // Only show if no result exists
+          });
+
+          // Only render if there are any running tool calls
+          if (runningToolCalls.length === 0) {
+            return null;
+          }
+
+          return (
+            <div className="mb-5 space-y-3">
+              {runningToolCalls.map((toolCall) => (
+                <div
+                  key={toolCall.id}
+                  className="flex items-center space-x-2 text-xs bg-gray-100 dark:bg-slate-700 rounded-lg px-3 py-2"
+                >
+                  <svg className="w-4 h-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span className="font-medium text-gray-700 dark:text-slate-300">
+                    Running: {toolCall.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Tool results */}
         {message.toolResults && message.toolResults.length > 0 && (
           <div className="mb-5 space-y-3">
-            {message.toolResults.map((result) => (
-              <ChatToolResult key={result.tool_call_id} result={result} />
-            ))}
+            {message.toolResults.map((result) => {
+              // Find the corresponding tool call by matching tool_call_id with tool call id
+              // Use robust string comparison
+              const correspondingToolCall = message.toolCalls?.find((call) => {
+                const callId = String(call.id || '').trim();
+                const resultCallId = String(result.tool_call_id || '').trim();
+                return callId === resultCallId && callId !== '';
+              });
+              return (
+                <ChatToolResult
+                  key={result.tool_call_id}
+                  result={result}
+                  toolCall={correspondingToolCall}
+                />
+              );
+            })}
           </div>
         )}
 

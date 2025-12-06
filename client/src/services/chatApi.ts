@@ -95,51 +95,27 @@ export async function sendMessageStream(
       const { done, value } = await reader.read();
 
       if (done) {
-        // Process any remaining data in buffer
-        if (buffer.trim()) {
-          const events = buffer.split('\n\n');
-          for (const eventBlock of events) {
-            const lines = eventBlock.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6)) as SSEEvent;
-                  onEvent(data);
-                } catch (e) {
-                  console.warn('Failed to parse SSE event:', line, e);
-                }
-              }
-            }
-          }
-        }
         break;
       }
 
       buffer += decoder.decode(value, { stream: true });
 
-      // SSE events are separated by double newlines (\n\n)
-      // Process complete events (those ending with \n\n)
-      const eventBlocks = buffer.split('\n\n');
-      // Keep the last incomplete block in buffer
-      buffer = eventBlocks.pop() || '';
+      // Process complete SSE messages (split by single newline)
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // Keep incomplete line in buffer
 
-      for (const eventBlock of eventBlocks) {
-        if (!eventBlock.trim()) continue;
-        
-        const lines = eventBlock.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6)) as SSEEvent;
-              onEvent(data);
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6)) as SSEEvent;
+            onEvent(data);
 
-              // Stop processing on done or error
-              if (data.type === 'done' || data.type === 'error') {
-                return;
-              }
-            } catch (e) {
-              console.warn('Failed to parse SSE event:', line, e);
+            // Stop processing on done or error
+            if (data.type === 'done' || data.type === 'error') {
+              return;
             }
+          } catch (e) {
+            console.warn('Failed to parse SSE event:', line, e);
           }
         }
       }

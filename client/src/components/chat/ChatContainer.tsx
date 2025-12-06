@@ -9,7 +9,7 @@
  * - Contains message list and input
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { useConversations } from '../../hooks/useConversations';
 import { chatApi } from '../../services/chatApi';
@@ -56,9 +56,23 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
     threadId: activeConversationId,
   });
 
+  // Track if we're currently streaming to avoid reloading during stream
+  const isStreamingRef = useRef(false);
+  
+  // Update streaming ref when isLoading changes
+  useEffect(() => {
+    isStreamingRef.current = isLoading;
+  }, [isLoading]);
+
   // Load conversation messages when active conversation changes
+  // BUT skip if we're currently streaming (to avoid clearing streaming state)
   useEffect(() => {
     const loadActiveConversation = async () => {
+      // Skip loading if we're currently streaming - don't interrupt the stream
+      if (isStreamingRef.current) {
+        return;
+      }
+      
       if (activeConversationId) {
         try {
           const conversation = await loadConversation(activeConversationId);

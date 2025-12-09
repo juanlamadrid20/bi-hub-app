@@ -31,7 +31,21 @@ variables:
 
 sync:
   exclude:
-    - src/app/.env  
+    - .git
+    - .venv
+    - .vscode
+    - .databricks
+    - .claude
+    - "*.pyc"
+    - __pycache__
+    - client/node_modules
+    - client/.venv
+    - server/.venv
+    - server/.env
+    - "*.egg-info"
+    - .DS_Store
+    - uv.lock
+    - .python-version
 
 targets:
   dev:
@@ -94,7 +108,7 @@ targets:
                   permission: CAN_CONNECT_AND_CREATE
                 name: database
           user_api_scopes: ["serving.serving-endpoints"]
-          source_code_path: ./src/app
+          source_code_path: .
           permissions:
             - level: "CAN_MANAGE"
               user_name: ${var.user_name}

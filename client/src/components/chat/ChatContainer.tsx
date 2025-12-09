@@ -16,6 +16,7 @@ import { chatApi } from '../../services/chatApi';
 import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
 import { ConversationSidebar } from './ConversationSidebar';
+import { UserMenu } from '../UserMenu';
 import type { StarterMessage } from '../../types/chat';
 
 interface ChatContainerProps {
@@ -225,7 +226,7 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
                 BI Hub Assistant
               </h1>
               <p className="text-xs text-gray-500 dark:text-slate-400">
-                Powered by Mosaic AI
+                Powered by Mosaic AI (1.0)
               </p>
             </div>
           </div>
@@ -243,6 +244,7 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
                 </svg>
               </button>
             )}
+            <UserMenu />
           </div>
         </div>
 

@@ -93,3 +93,7 @@ def _get_value(obj: Any, key: str) -> Any:
     if obj is None:
         return None
     return getattr(obj, key, None) or (isinstance(obj, dict) and obj.get(key))
+
+
+
+

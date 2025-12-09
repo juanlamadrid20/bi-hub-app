@@ -17,7 +17,7 @@ export function ChatInput({
   onSend,
   isLoading = false,
   disabled = false,
-  placeholder = 'Ask a question...',
+  placeholder = 'Ask a question ...',
 }: ChatInputProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -93,7 +93,7 @@ export function ChatInput({
                 : 'bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed'
             }
           `}
-          title="Send message"
+          title="Send Message"
         >
           {isLoading ? (
             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -127,3 +127,6 @@ export function ChatInput({
 }
 
 export default ChatInput;
+
+
+

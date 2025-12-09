@@ -83,3 +83,7 @@ async def get_identity(request: Request) -> Identity:
             status_code=500,
             detail="No authentication method configured",
         )
+
+
+
+

@@ -15,6 +15,13 @@ openai>=1.12.0
 # Environment
 python-dotenv>=1.0.0
 
+# Databricks SDK
+databricks-sdk>=0.67.0
+
 # Database (optional, for future use)
 psycopg[binary]>=3.1.0
 sqlalchemy>=2.0.0
+
+
+
+

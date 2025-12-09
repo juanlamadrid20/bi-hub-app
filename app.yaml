@@ -1,7 +1,7 @@
 # BI Hub App - Databricks Apps Configuration
 # React frontend + FastAPI backend
 
-command: ['gunicorn', 'server.app:app', '-w', '2', '-k', 'uvicorn.workers.UvicornWorker', '--bind', '0.0.0.0:8000']
+command: ["gunicorn", "server.app:app", "-w", "2", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
 
 env:
   # Database Configuration
@@ -11,6 +11,10 @@ env:
   # Serving Endpoint
   - name: SERVING_ENDPOINT
     value: "mas-d8f57d8b-endpoint"
+
+  # Databricks Workspace Host (for logout URL)
+  - name: DATABRICKS_HOST
+    valueFrom: "databricks-host"
 
   # Authentication Mode
   - name: ENABLE_HEADER_AUTH

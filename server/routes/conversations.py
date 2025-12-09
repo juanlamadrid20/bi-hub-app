@@ -182,3 +182,7 @@ async def delete_conversation(
     except Exception as e:
         logger.exception(f"Error deleting conversation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+

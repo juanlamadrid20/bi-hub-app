@@ -7,17 +7,21 @@
  * - Displays conversation sidebar
  * - Displays starter messages on empty state
  * - Contains message list and input
+ * - Manages prompt library modal
  */
 
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { useConversations } from '../../hooks/useConversations';
 import { chatApi } from '../../services/chatApi';
+import { promptApi } from '../../services/promptApi';
 import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
 import { ConversationSidebar } from './ConversationSidebar';
+import { PromptModal } from './PromptModal';
 import { UserMenu } from '../UserMenu';
 import type { StarterMessage } from '../../types/chat';
+import type { Prompt } from '../../types/prompt';
 
 interface ChatContainerProps {
   className?: string;
@@ -27,11 +31,16 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
   const [starters, setStarters] = useState<StarterMessage[]>([]);
   const [startersLoading, setStartersLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [promptModalOpen, setPromptModalOpen] = useState(false);
+
+  // Ref to access ChatInput for inserting prompt content
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     groupedConversations,
     activeConversationId,
     loadConversation,
+    renameConversation,
     deleteConversation,
     setActiveConversationId,
     refreshConversations,
@@ -171,6 +180,20 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
   );
 
   /**
+   * Handle renaming a conversation
+   */
+  const handleRenameConversation = useCallback(
+    async (id: string, title: string) => {
+      try {
+        await renameConversation(id, title);
+      } catch (err) {
+        console.error('Failed to rename conversation:', err);
+      }
+    },
+    [renameConversation]
+  );
+
+  /**
    * Handle deleting a conversation
    */
   const handleDeleteConversation = useCallback(
@@ -187,6 +210,28 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
     [deleteConversation, activeConversationId, clearMessages]
   );
 
+  /**
+   * Handle prompt selection from modal
+   * Sends the prompt content as a message
+   */
+  const handleSelectPrompt = useCallback(
+    (prompt: Prompt) => {
+      // Send the prompt content as a message
+      handleSend(prompt.content);
+      
+      // Increment usage (fire and forget)
+      promptApi.incrementUsage(prompt.id).catch(() => {});
+    },
+    [handleSend]
+  );
+
+  /**
+   * Open the prompt browser modal
+   */
+  const handleOpenPrompts = useCallback(() => {
+    setPromptModalOpen(true);
+  }, []);
+
   const hasMessages = messages.length > 0 || streamingMessage !== null;
 
   return (
@@ -197,6 +242,7 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
         activeConversationId={activeConversationId}
         onSelectConversation={handleSelectConversation}
         onCreateConversation={handleNewConversation}
+        onRenameConversation={handleRenameConversation}
         onDeleteConversation={handleDeleteConversation}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -321,8 +367,20 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
       )}
 
         {/* Input */}
-        <ChatInput onSend={handleSend} isLoading={isLoading} disabled={false} />
+        <ChatInput 
+          onSend={handleSend} 
+          isLoading={isLoading} 
+          disabled={false}
+          onOpenPrompts={handleOpenPrompts}
+        />
       </div>
+
+      {/* Prompt Browser Modal */}
+      <PromptModal
+        isOpen={promptModalOpen}
+        onClose={() => setPromptModalOpen(false)}
+        onSelectPrompt={handleSelectPrompt}
+      />
     </div>
   );
 }

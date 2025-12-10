@@ -2,10 +2,10 @@
  * ConversationSidebar Component
  *
  * Displays conversation history in a sidebar, grouped by time periods.
- * Allows creating new conversations, selecting existing ones, and deleting conversations.
+ * Allows creating new conversations, selecting existing ones, renaming, and deleting conversations.
  */
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Conversation } from '../../types/chat';
 
 interface ConversationSidebarProps {
@@ -17,6 +17,8 @@ interface ConversationSidebarProps {
   onSelectConversation: (id: string) => void;
   /** Callback to create a new conversation */
   onCreateConversation: () => void;
+  /** Callback to rename a conversation */
+  onRenameConversation: (id: string, title: string) => void;
   /** Callback to delete a conversation */
   onDeleteConversation: (id: string) => void;
   /** Whether the sidebar is open (for mobile) */
@@ -30,6 +32,7 @@ export function ConversationSidebar({
   activeConversationId,
   onSelectConversation,
   onCreateConversation,
+  onRenameConversation,
   onDeleteConversation,
   isOpen = true,
   onClose,
@@ -37,6 +40,19 @@ export function ConversationSidebar({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (editingId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingId]);
 
   // Filter conversations based on search
   const filteredGroups = showSearch && searchQuery
@@ -52,6 +68,7 @@ export function ConversationSidebar({
     : groupedConversations;
 
   const handleConversationClick = (id: string) => {
+    if (editingId === id) return; // Don't navigate while editing
     onSelectConversation(id);
     onClose?.();
   };
@@ -60,6 +77,36 @@ export function ConversationSidebar({
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this conversation?')) {
       onDeleteConversation(id);
+    }
+  };
+
+  const handleStartEdit = (e: React.MouseEvent, conv: Conversation) => {
+    e.stopPropagation();
+    setEditingId(conv.id);
+    setEditingTitle(conv.title);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingTitle('');
+  };
+
+  const handleSaveEdit = (id: string) => {
+    const trimmedTitle = editingTitle.trim();
+    if (trimmedTitle && trimmedTitle !== '') {
+      onRenameConversation(id, trimmedTitle);
+    }
+    setEditingId(null);
+    setEditingTitle('');
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit(id);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
     }
   };
 
@@ -87,7 +134,7 @@ export function ConversationSidebar({
         {/* Header with icons */}
         <div className="flex items-center justify-between p-3 border-b border-slate-700">
           <div className="flex items-center space-x-2">
-            {/* History icon */}
+            {/* New conversation icon */}
             <button
               onClick={onCreateConversation}
               className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-lg transition-colors"
@@ -152,6 +199,7 @@ export function ConversationSidebar({
                 {group.conversations.map((conv) => {
                   const isActive = conv.id === activeConversationId;
                   const isHovered = hoveredId === conv.id;
+                  const isEditing = editingId === conv.id;
 
                   return (
                     <div
@@ -169,19 +217,48 @@ export function ConversationSidebar({
                       onMouseLeave={() => setHoveredId(null)}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm flex-1 line-clamp-2 break-words">
-                          {conv.title}
-                        </p>
-                        {(isHovered || isActive) && (
-                          <button
-                            onClick={(e) => handleDelete(e, conv.id)}
-                            className="flex-shrink-0 p-1 text-slate-400 hover:text-red-400 hover:bg-slate-600 rounded transition-colors"
-                            title="Delete conversation"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
+                        {isEditing ? (
+                          // Inline edit input
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onKeyDown={(e) => handleEditKeyDown(e, conv.id)}
+                            onBlur={() => handleSaveEdit(conv.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-1 px-2 py-1 text-sm bg-slate-600 text-slate-100 rounded border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <p className="text-sm flex-1 line-clamp-2 break-words">
+                            {conv.title}
+                          </p>
+                        )}
+                        
+                        {/* Action buttons - show on hover or active, hide when editing */}
+                        {!isEditing && (isHovered || isActive) && (
+                          <div className="flex-shrink-0 flex items-center space-x-1">
+                            {/* Edit/Rename button */}
+                            <button
+                              onClick={(e) => handleStartEdit(e, conv)}
+                              className="p-1 text-slate-400 hover:text-blue-400 hover:bg-slate-600 rounded transition-colors"
+                              title="Rename conversation"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            {/* Delete button */}
+                            <button
+                              onClick={(e) => handleDelete(e, conv.id)}
+                              className="p-1 text-slate-400 hover:text-red-400 hover:bg-slate-600 rounded transition-colors"
+                              title="Delete conversation"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -197,7 +274,3 @@ export function ConversationSidebar({
 }
 
 export default ConversationSidebar;
-
-
-
-

@@ -59,9 +59,12 @@ async def get_auth_status(request: Request) -> AuthStatusResponse:
         # Build logout URL for Databricks Apps
         logout_url = None
         if settings.enable_header_auth and settings.databricks_host:
-            # Databricks Apps logout redirects to workspace login
+            # Databricks Apps logout - use /logout endpoint
             host = settings.databricks_host.rstrip("/")
-            logout_url = f"{host}/login/logout"
+            # Ensure host has https:// prefix
+            if not host.startswith("https://"):
+                host = f"https://{host}"
+            logout_url = f"{host}/logout"
 
         return AuthStatusResponse(
             authenticated=True,

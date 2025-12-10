@@ -22,6 +22,8 @@ interface UseConversationsReturn {
   loadConversation: (id: string) => Promise<Conversation | null>;
   /** Update the current conversation with new messages */
   updateConversation: (messages: Message[]) => Promise<void>;
+  /** Rename a conversation */
+  renameConversation: (id: string, title: string) => Promise<void>;
   /** Delete a conversation */
   deleteConversation: (id: string) => Promise<void>;
   /** Set the active conversation */
@@ -217,6 +219,28 @@ export function useConversations(): UseConversationsReturn {
   );
 
   /**
+   * Rename a conversation
+   */
+  const renameConversation = useCallback(async (id: string, title: string) => {
+    try {
+      const updated = await chatApi.updateConversation(id, title);
+      setConversations((prev) => {
+        const index = prev.findIndex((c) => c.id === id);
+        if (index >= 0) {
+          const updatedList = [...prev];
+          updatedList[index] = updated;
+          return updatedList;
+        }
+        return prev;
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to rename conversation';
+      setError(errorMessage);
+      throw err;
+    }
+  }, []);
+
+  /**
    * Delete a conversation
    */
   const deleteConversation = useCallback(async (id: string) => {
@@ -248,6 +272,7 @@ export function useConversations(): UseConversationsReturn {
     createConversation,
     loadConversation,
     updateConversation,
+    renameConversation,
     deleteConversation,
     setActiveConversationId,
     generateTitle,

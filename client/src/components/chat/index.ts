@@ -8,3 +8,5 @@ export { ChatMessage } from './ChatMessage';
 export { ChatMessageList } from './ChatMessageList';
 export { ChatToolResult } from './ChatToolResult';
 export { ConversationSidebar } from './ConversationSidebar';
+export { PromptModal } from './PromptModal';
+export { PromptForm } from './PromptForm';

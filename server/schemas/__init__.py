@@ -10,6 +10,13 @@ from .chat import (
     SSEDoneEvent,
     SSEErrorEvent,
 )
+from .prompt import (
+    PromptCreateRequest,
+    PromptUpdateRequest,
+    PromptResponse,
+    PromptListResponse,
+    PromptUsageResponse,
+)
 
 __all__ = [
     "SendMessageRequest",
@@ -20,6 +27,11 @@ __all__ = [
     "SSEToolResultEvent",
     "SSEDoneEvent",
     "SSEErrorEvent",
+    "PromptCreateRequest",
+    "PromptUpdateRequest",
+    "PromptResponse",
+    "PromptListResponse",
+    "PromptUsageResponse",
 ]
 
 

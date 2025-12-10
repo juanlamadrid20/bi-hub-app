@@ -19,6 +19,22 @@ export type {
   ChatState,
 } from './chat';
 
+export type {
+  Prompt,
+  PromptCategory,
+  PromptCreateRequest,
+  PromptUpdateRequest,
+  PromptListResponse,
+  PromptUsageResponse,
+  CategoryConfig,
+} from './prompt';
+
+export {
+  PROMPT_CATEGORIES,
+  CATEGORY_LABELS,
+  CATEGORY_ICONS,
+} from './prompt';
+
 
 
 

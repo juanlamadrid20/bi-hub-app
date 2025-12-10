@@ -9,7 +9,7 @@ __pycache__/
 *.egg
 *.egg-info/
 dist/
-build/
+# Note: client/build is intentionally NOT ignored - it's needed for deployment
 
 # Virtual environments
 .env

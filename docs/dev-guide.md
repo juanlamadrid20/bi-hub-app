@@ -405,6 +405,98 @@ ENABLE_PASSWORD_AUTH=true
 cd client && npm run build
 ```
 
+#### App Crashes on Deployment ("app crashed unexpectedly")
+
+**Symptom**: After running `databricks bundle run`, the app fails with:
+```
+✓ Error: app crashed unexpectedly. Please check /logz for more details
+Error: failed to reach SUCCEEDED, got FAILED: Error: app crashed unexpectedly. Please check /logz for more details
+```
+
+**Common Causes & Fixes**:
+
+##### 1. Missing Port Binding
+
+Databricks Apps require the app to bind to port 8000. Ensure `app.yaml` includes the `--bind` flag:
+
+```yaml
+command:
+  - "gunicorn"
+  - "server.app:app"
+  - "-w"
+  - "2"
+  - "--worker-class"
+  - "uvicorn.workers.UvicornWorker"
+  - "--pythonpath"
+  - "."
+  - "--bind"
+  - "0.0.0.0:8000"
+```
+
+##### 2. Files Not Synced by Bundle Deploy
+
+Sometimes `databricks bundle deploy` doesn't sync all files (e.g., `server/config.py` may be missing).
+
+**Diagnose** - Check which files were actually deployed:
+```bash
+# List deployed server files
+databricks workspace list \
+  "/Workspace/Users/<your-email>/apps/bi-hub-app/files/server" \
+  --profile <PROFILE>
+```
+
+If `config.py` or other critical files are missing, the app will crash on import.
+
+**Fix** - Manually upload missing files:
+```bash
+databricks workspace import \
+  /Workspace/Users/<your-email>/apps/bi-hub-app/files/server/config.py \
+  --file ./server/config.py \
+  --format AUTO \
+  --profile <PROFILE>
+```
+
+**Permanent Fix** - Clear bundle cache and redeploy:
+```bash
+# Clear the bundle cache
+rm -rf .databricks/.bundle
+
+# Redeploy
+databricks bundle deploy --profile <PROFILE>
+
+# Run the app
+databricks bundle run --profile <PROFILE> bi-agent
+```
+
+##### 3. Import Errors
+
+If a Python module fails to import, the app crashes immediately with no useful error message.
+
+**Diagnose** - Test imports locally:
+```bash
+python -c "from server.app import app; print('Import successful')"
+```
+
+##### Useful Debugging Commands
+
+```bash
+# Check app status and error details
+databricks apps get bi-hub-app --profile <PROFILE>
+
+# Get deployment details (use deployment ID from above)
+databricks apps get-deployment bi-hub-app <deployment-id> --profile <PROFILE>
+
+# List all files in deployed server directory
+databricks workspace list \
+  "/Workspace/Users/<email>/apps/bi-hub-app/files/server" \
+  --profile <PROFILE>
+
+# Verify specific subdirectories
+databricks workspace list \
+  "/Workspace/Users/<email>/apps/bi-hub-app/files/server/routes" \
+  --profile <PROFILE>
+```
+
 ### Debug Mode
 
 Enable verbose logging:

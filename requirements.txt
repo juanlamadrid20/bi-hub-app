@@ -1,3 +1,0 @@
-# BI Hub App Dependencies
-# Include server dependencies
--r server/requirements.txt

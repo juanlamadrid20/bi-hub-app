@@ -33,9 +33,6 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [promptModalOpen, setPromptModalOpen] = useState(false);
 
-  // Ref to access ChatInput for inserting prompt content
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
   const {
     groupedConversations,
     activeConversationId,

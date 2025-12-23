@@ -18,8 +18,6 @@ interface ChatInputProps {
   isLoading?: boolean;
   disabled?: boolean;
   placeholder?: string;
-  /** Callback to open the prompt browser modal */
-  onOpenPrompts?: () => void;
 }
 
 export function ChatInput({
@@ -27,7 +25,6 @@ export function ChatInput({
   isLoading = false,
   disabled = false,
   placeholder = 'Ask about your portfolio...',
-  onOpenPrompts,
 }: ChatInputProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -239,31 +236,7 @@ export function ChatInput({
           />
         </div>
 
-        {/* Prompt browser button */}
-        {onOpenPrompts && (
-          <button
-            onClick={onOpenPrompts}
-            disabled={isDisabled}
-            className="p-3 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Browse prompts"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-          </button>
-        )}
-
-        {/* Send button */}
+{/* Send button */}
         <button
           onClick={handleSubmit}
           disabled={!canSend}
@@ -307,12 +280,8 @@ export function ChatInput({
         <span>Enter</span> send
         <span className="mx-2">|</span>
         <span>Shift+Enter</span> newline
-        {onOpenPrompts && (
-          <>
-            <span className="mx-2">|</span>
-            <span className="text-blue-500 dark:text-blue-400">/</span> prompts
-          </>
-        )}
+        <span className="mx-2">|</span>
+        <span className="text-blue-500 dark:text-blue-400">/</span> prompts
       </p>
     </div>
   );

@@ -8,6 +8,31 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Conversation } from '../../types/chat';
 
+/**
+ * Format a timestamp for display in the sidebar
+ * Shows time for today, day name for this week, or date for older
+ */
+function formatTimestamp(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) {
+    return 'Just now';
+  } else if (diffMins < 60) {
+    return `${diffMins}m ago`;
+  } else if (diffHours < 24 && date.getDate() === now.getDate()) {
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } else if (diffDays < 7) {
+    return date.toLocaleDateString([], { weekday: 'short' });
+  } else {
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+}
+
 interface ConversationSidebarProps {
   /** Grouped conversations to display */
   groupedConversations: Array<{ label: string; conversations: Conversation[] }>;
@@ -230,9 +255,14 @@ export function ConversationSidebar({
                             className="flex-1 px-2 py-1 text-sm bg-slate-600 text-slate-100 rounded border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-sm flex-1 line-clamp-2 break-words">
-                            {conv.title}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm line-clamp-2 break-words">
+                              {conv.title}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              {formatTimestamp(conv.updatedAt)}
+                            </p>
+                          </div>
                         )}
                         
                         {/* Action buttons - show on hover or active, hide when editing */}

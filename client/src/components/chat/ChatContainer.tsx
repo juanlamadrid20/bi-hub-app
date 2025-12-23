@@ -19,6 +19,8 @@ import ChatInput from './ChatInput';
 import ChatMessageList from './ChatMessageList';
 import { ConversationSidebar } from './ConversationSidebar';
 import { PromptModal } from './PromptModal';
+import { AnalyticsDashboard } from '../analytics';
+import { AboutModal } from '../about';
 import { UserMenu } from '../UserMenu';
 import type { StarterMessage } from '../../types/chat';
 import type { Prompt } from '../../types/prompt';
@@ -32,6 +34,8 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
   const [startersLoading, setStartersLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [promptModalOpen, setPromptModalOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const {
     groupedConversations,
@@ -261,21 +265,50 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
               </svg>
             </button>
 
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <button
+              onClick={() => setAboutOpen(true)}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+              title="About BI Hub"
+            >
               <span className="text-white text-lg">🤖</span>
-            </div>
+            </button>
             <div>
-              <h1 className="font-semibold text-gray-900 dark:text-slate-100">
-                BI Hub Assistant
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-slate-400">
-                Powered by Mosaic AI (1.0)
-              </p>
+              <button
+                onClick={() => setAboutOpen(true)}
+                className="text-left hover:opacity-80 transition-opacity"
+              >
+                <h1 className="font-semibold text-gray-900 dark:text-slate-100">
+                  BI Hub Assistant
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-slate-400">
+                  Powered by Mosaic AI ({__APP_VERSION__})
+                </p>
+              </button>
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
+            {/* Browse prompts button */}
+            <button
+              onClick={handleOpenPrompts}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title="Browse prompts"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+            {/* Analytics button */}
+            <button
+              onClick={() => setAnalyticsOpen(true)}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title="Analytics Dashboard"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </button>
             {hasMessages && (
               <button
                 onClick={handleNewConversation}
@@ -364,11 +397,10 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
       )}
 
         {/* Input */}
-        <ChatInput 
-          onSend={handleSend} 
-          isLoading={isLoading} 
+        <ChatInput
+          onSend={handleSend}
+          isLoading={isLoading}
           disabled={false}
-          onOpenPrompts={handleOpenPrompts}
         />
       </div>
 
@@ -378,6 +410,19 @@ export function ChatContainer({ className = '' }: ChatContainerProps) {
         onClose={() => setPromptModalOpen(false)}
         onSelectPrompt={handleSelectPrompt}
       />
+
+      {/* Analytics Dashboard Modal */}
+      {analyticsOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setAnalyticsOpen(false)} />
+          <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+            <AnalyticsDashboard onClose={() => setAnalyticsOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* About Modal */}
+      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

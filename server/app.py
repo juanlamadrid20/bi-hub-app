@@ -6,6 +6,7 @@ Following Databricks Apps pattern with React frontend and FastAPI backend.
 """
 
 import logging
+import tomllib
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
@@ -18,6 +19,16 @@ from fastapi.staticfiles import StaticFiles
 from .routes import api_router
 
 logger = logging.getLogger(__name__)
+
+
+def get_version() -> str:
+    """Read version from pyproject.toml."""
+    pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+    if pyproject_path.exists():
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+            return data.get("project", {}).get("version", "1.0.0")
+    return "1.0.0"
 
 # Path to frontend build directory
 CLIENT_BUILD_DIR = Path(__file__).parent.parent / "client" / "build"
@@ -41,7 +52,7 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="BI Hub API",
         description="REST API for BI Hub Chat with Mosaic AI Agents",
-        version="1.0.0",
+        version=get_version(),
         lifespan=lifespan,
         # Don't include docs in production - only API endpoints
         docs_url="/api/docs",
@@ -98,6 +109,12 @@ def create_app() -> FastAPI:
     async def health_check() -> dict:
         """Health check endpoint."""
         return {"status": "healthy", "service": "bi-hub-api"}
+
+    # Version endpoint
+    @application.get("/api/version", tags=["Health"])
+    async def get_app_version() -> dict:
+        """Get application version."""
+        return {"version": get_version()}
 
     # Mount static files for React frontend (must be last)
     if CLIENT_BUILD_DIR.exists():

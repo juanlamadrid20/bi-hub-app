@@ -317,6 +317,202 @@ DATABASE_INSTANCE=cx-live-demo-no-delete
 
 ---
 
+## Authentication System Deep Dive
+
+This section provides a comprehensive technical guide to how authentication works end-to-end in the BI Hub App.
+
+### Authentication Modes Overview
+
+The app implements a **dual-mode authentication system**:
+
+| Mode | Context | Token Source | Use Case |
+|------|---------|--------------|----------|
+| **OBO (On-Behalf-Of)** | Databricks Apps | `x-forwarded-access-token` header | Production |
+| **PAT (Personal Access Token)** | Local development | `DATABRICKS_TOKEN` env var | Development |
+
+**Important**: Exactly ONE mode must be enabled at a time.
+
+### End-to-End Authentication Flow
+
+#### OBO Flow (Production - Databricks Apps)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ User Browser                                                             │
+│   │                                                                      │
+│   ├─► GET https://bi-hub-app.databricksapps.com/                        │
+│   │                                                                      │
+│   ▼                                                                      │
+│ Databricks Apps Proxy                                                    │
+│   │ Authenticates user via workspace SSO                                │
+│   │ Injects headers:                                                    │
+│   │   • x-forwarded-email: user@company.com                             │
+│   │   • x-forwarded-preferred-username: John Doe                        │
+│   │   • x-forwarded-access-token: eyJ0eXAi... (OBO token)               │
+│   │                                                                      │
+│   ▼                                                                      │
+│ FastAPI Backend (server/auth/dependencies.py)                           │
+│   │ get_identity(request) extracts headers                              │
+│   │ Creates Identity with OboTokenSource                                │
+│   │                                                                      │
+│   ▼                                                                      │
+│ MAS Client (server/services/mas_client.py)                              │
+│   │ bearer = identity.token_source.bearer_token()                       │
+│   │ POST /serving-endpoints/{endpoint}/invocations                      │
+│   │   Authorization: Bearer {OBO_TOKEN}                                 │
+│   │                                                                      │
+│   ▼                                                                      │
+│ Databricks Model Serving                                                 │
+│   └─► Validates OBO token, returns streaming response                   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### PAT Flow (Local Development)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Developer Browser                                                        │
+│   │                                                                      │
+│   ├─► GET http://localhost:5173/                                        │
+│   │                                                                      │
+│   ▼                                                                      │
+│ Vite Dev Server (proxies /api/* to backend)                             │
+│   │                                                                      │
+│   ▼                                                                      │
+│ FastAPI Backend (server/auth/dependencies.py)                           │
+│   │ get_identity(request) checks ENABLE_PASSWORD_AUTH=true              │
+│   │ Creates Identity with PatTokenSource(DATABRICKS_TOKEN)              │
+│   │                                                                      │
+│   ▼                                                                      │
+│ MAS Client (server/services/mas_client.py)                              │
+│   │ bearer = identity.token_source.bearer_token()                       │
+│   │ POST /serving-endpoints/{endpoint}/invocations                      │
+│   │   Authorization: Bearer {PAT}                                       │
+│   │                                                                      │
+│   ▼                                                                      │
+│ Databricks Model Serving                                                 │
+│   └─► Validates PAT, returns streaming response                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Authentication Files
+
+| File | Purpose |
+|------|---------|
+| `server/auth/identity.py` | Identity model + OboTokenSource/PatTokenSource classes |
+| `server/auth/dependencies.py` | FastAPI `get_identity()` dependency |
+| `server/routes/auth.py` | `/api/auth/me` and `/api/auth/status` endpoints |
+| `server/config.py` | Settings with auth mode flags |
+| `client/src/hooks/useAuth.ts` | React hook for auth state |
+| `client/src/services/authApi.ts` | Frontend API calls |
+| `client/src/components/UserMenu.tsx` | User menu with logout |
+
+### Identity Resolution Code Path
+
+```python
+# server/auth/dependencies.py
+async def get_identity(request: Request) -> Identity:
+    if settings.enable_header_auth:
+        # OBO Mode - Extract from forwarded headers
+        email = headers.get("x-forwarded-email")
+        display_name = headers.get("x-forwarded-preferred-username")
+        token = headers.get("x-forwarded-access-token")
+
+        return Identity(
+            email=email,
+            display_name=display_name,
+            auth_type="obo",
+            token_source=OboTokenSource(lambda: headers),
+        )
+
+    elif settings.enable_password_auth:
+        # PAT Mode - Use configured token
+        return Identity(
+            email="local@dev",
+            display_name="Local Developer",
+            auth_type="pat",
+            token_source=PatTokenSource(settings.pat),
+        )
+```
+
+### Token Sources
+
+**OboTokenSource** - Retrieves token from request headers on each call:
+```python
+class OboTokenSource:
+    def bearer_token(self) -> str:
+        headers = self._headers_getter()
+        return headers.get("x-forwarded-access-token", "")
+```
+
+**PatTokenSource** - Returns configured PAT:
+```python
+class PatTokenSource:
+    def bearer_token(self) -> str:
+        return self._pat or ""
+```
+
+### Protected vs Public Endpoints
+
+```python
+# Protected - requires authentication
+GET  /api/auth/me                      # Depends(get_identity)
+POST /api/chat/message/stream          # Depends(get_identity)
+GET  /api/chat/conversations           # Depends(get_identity)
+POST /api/prompts                      # Depends(get_identity)
+
+# Public - no authentication required
+GET  /api/auth/status                  # Gracefully handles unauthenticated
+GET  /api/chat/starters                # No auth needed
+GET  /health                           # Health check
+```
+
+### Database Credentials (Lakebase)
+
+Database authentication is handled separately via the Databricks SDK:
+
+```python
+# server/services/database.py
+class LakebaseCredentialProvider:
+    def get_credential(self) -> Credential:
+        w = WorkspaceClient()  # Uses app's auth (OBO or PAT)
+        cred = w.database.generate_database_credential(
+            request_id=str(uuid.uuid4()),
+            instance_names=[settings.pg_database_instance]
+        )
+        return Credential(token=cred.token, expiration_time=cred.expiration_time)
+```
+
+**Key points:**
+- Uses the app's own authentication (not user's token)
+- Credentials are cached with 1-minute refresh threshold
+- Injected into SQLAlchemy connections via `do_connect` event
+
+### Frontend Authentication
+
+The React frontend uses the `useAuth` hook:
+
+```typescript
+// client/src/hooks/useAuth.ts
+interface UseAuthReturn {
+  user: AuthUser | null;          // { email, display_name, auth_type }
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  logoutUrl: string | null;       // https://{host}/logout for OBO
+  logout: () => void;
+  refresh: () => Promise<void>;
+}
+```
+
+### Logout Behavior
+
+| Mode | Logout URL | Behavior |
+|------|------------|----------|
+| OBO | `https://{DATABRICKS_HOST}/logout` | Redirects to workspace logout |
+| PAT | `null` | No logout (local dev) |
+
+---
+
 ## Troubleshooting
 
 ### Common Issues

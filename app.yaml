@@ -20,7 +20,7 @@ env:
 
   # Serving Endpoint
   - name: SERVING_ENDPOINT
-    value: "mas-d8f57d8b-endpoint"
+    value: "mas-9e2eefcb-endpoint"
 
   # Databricks Workspace Host is automatically set by the runtime as DATABRICKS_HOST
 

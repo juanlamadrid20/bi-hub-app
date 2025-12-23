@@ -23,7 +23,7 @@ variables:
 
   model_endpoint_name:
     description: "Databricks model serving endpoint name"
-    default: "mas-d8f57d8b-endpoint"
+    default: "mas-9e2eefcb-endpoint"
   
   user_name:
     description: "User name for permissions"
@@ -59,13 +59,32 @@ targets:
     
     resources:
       jobs:
+        create_lakebase:
+          name: "create-lakebase-dev"
+          description: "Create Lakebase PostgreSQL instance for development"
+          tasks:
+            - task_key: "create_instance"
+              notebook_task:
+                notebook_path: "./lakebase/jobs/lakebase_create.ipynb"
+              environment_key: "default"
+          environments:
+            - environment_key: "default"
+              spec:
+                environment_version: "4"
+                dependencies:
+                  - psycopg2-binary==2.9.9
+                  - databricks-sdk==0.65.0
+          permissions:
+            - level: "CAN_MANAGE"
+              user_name: ${var.user_name}
+
         setup_lakebase:
           name: "setup-lakebase-dev"
-          description: "Setup Lakebase PostgreSQL database and tables for development"
+          description: "Setup Lakebase PostgreSQL schema and tables for development"
           tasks:
             - task_key: "setup_database"
               notebook_task:
-                notebook_path: "./jobs/setup_chainlit_lakebase.ipynb"
+                notebook_path: "./lakebase/jobs/lakebase_chainlit_setup.ipynb"
               environment_key: "default"
           environments:
             - environment_key: "default"
@@ -84,6 +103,32 @@ targets:
               default: ${var.app_name}
             - name: port
               default: "5432"
+          permissions:
+            - level: "CAN_MANAGE"
+              user_name: ${var.user_name}
+
+        setup_prompts:
+          name: "setup-prompts-dev"
+          description: "Setup prompts table and grant permissions to app service principal"
+          tasks:
+            - task_key: "setup_prompts_table"
+              notebook_task:
+                notebook_path: "./lakebase/jobs/setup_prompts_table.ipynb"
+              environment_key: "default"
+          environments:
+            - environment_key: "default"
+              spec:
+                environment_version: "4"
+                dependencies:
+                  - psycopg[binary]==3.2.9
+                  - databricks-sdk>=0.40.0
+          parameters:
+            - name: instance_name
+              default: ${var.lakebase_instance_name}
+            - name: database
+              default: ${var.lakebase_database_name}
+            - name: app_name
+              default: ${var.app_name}
           permissions:
             - level: "CAN_MANAGE"
               user_name: ${var.user_name}
